@@ -75,3 +75,7 @@ D:\DominionWarehouseAPI\DominionWarehouseAPI\obj\Debug\net7.0\DominionWarehouseA
 D:\DominionWarehouseAPI\DominionWarehouseAPI\obj\Debug\net7.0\DominionWarehouseAPI.genruntimeconfig.cache
 D:\DominionWarehouseAPI\DominionWarehouseAPI\obj\Debug\net7.0\ref\DominionWarehouseAPI.dll
 D:\DominionWarehouseAPI\DominionWarehouseAPI\bin\Debug\net7.0\BCrypt.Net-Next.dll
+D:\DominionWarehouseAPI\DominionWarehouseAPI\bin\Debug\net7.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\DominionWarehouseAPI\DominionWarehouseAPI\bin\Debug\net7.0\Scrutor.dll
+D:\DominionWarehouseAPI\DominionWarehouseAPI\bin\Debug\net7.0\Swashbuckle.AspNetCore.Filters.dll
+D:\DominionWarehouseAPI\DominionWarehouseAPI\bin\Debug\net7.0\Swashbuckle.AspNetCore.Filters.Abstractions.dll

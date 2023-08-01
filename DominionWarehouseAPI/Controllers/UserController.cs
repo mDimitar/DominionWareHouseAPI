@@ -24,7 +24,7 @@ namespace DominionWarehouseAPI.Controllers
             _configuration = configuration;
         }
 
-        [HttpPost("register")]
+        [HttpPost("Register")]
         public ActionResult<User> Register(UserDTO request)
         {
             var userExists = dbContext.Users.Any(user => user.Username == request.Username);
@@ -61,7 +61,7 @@ namespace DominionWarehouseAPI.Controllers
             return new JsonResult(successfullResponse);
         }
 
-        [HttpPost("login")]
+        [HttpPost("Login")]
         public ActionResult<User> Login(UserDTO request)
         {
             var userExists = dbContext.Users.Any(user => user.Username == request.Username);

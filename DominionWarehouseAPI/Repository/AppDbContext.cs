@@ -10,6 +10,7 @@ namespace DominionWarehouseAPI.Database
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<Warehouse> Warehouse { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -17,6 +18,12 @@ namespace DominionWarehouseAPI.Database
             modelBuilder.Entity<User>().ToTable("Users");
 
             // Other entity configurations (if any)
+            modelBuilder.Entity<Warehouse>()
+                .ToTable("Warehouse")
+                .HasOne<User>(w => w.User)
+                .WithMany()
+                .HasForeignKey(w => w.userId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
     }
