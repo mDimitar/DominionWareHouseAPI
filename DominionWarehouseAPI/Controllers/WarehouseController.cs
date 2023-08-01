@@ -28,10 +28,17 @@ namespace DominionWarehouseAPI.Controllers
         public async Task<ActionResult<Warehouse>> GetAllWarehouses()
         {
             var warehouses = await dbContext.Warehouse.Include(w => w.User).ToListAsync();
+
             if (warehouses.IsNullOrEmpty())
             {
-                return BadRequest("warehouse empty");
+                var failPullResponse = new CustomizedResponse
+                {
+                    Success = false,
+                    Message = "There are no existing warehouse records in the database.",
+                };
+                return new JsonResult(failPullResponse);
             }
+
             return Ok(warehouses);
         }
 
@@ -96,6 +103,16 @@ namespace DominionWarehouseAPI.Controllers
         {
             var existingWarehouse = dbContext.Warehouse.Include(w => w.User).FirstOrDefault(w => w.Id == id);
 
+            if (existingWarehouse == null)
+            {
+                var failEditResponse = new CustomizedResponse
+                {
+                    Success = false,
+                    Message = "The warehouse you are trying to edit cannot be found.",
+                };
+                return new JsonResult(failEditResponse);
+            }
+
             existingWarehouse.Name = updatedWarehouseDTO.Name;
             existingWarehouse.Address = updatedWarehouseDTO.Address;
 
@@ -108,6 +125,34 @@ namespace DominionWarehouseAPI.Controllers
             };
 
             return new JsonResult(successEditResponse);
+        }
+
+        [HttpDelete("DeleteWarehouse/{id}")]
+        public IActionResult DeleteWarehouse(int id)
+        {
+            var warehouse = dbContext.Warehouse.FirstOrDefault(w => w.Id == id);
+            
+            if(warehouse == null)
+            {
+                var failDeleteResponse = new CustomizedResponse
+                {
+                    Success = false,
+                    Message = "The warehouse you are trying to delete cannot be found.",
+                };
+                return new JsonResult(failDeleteResponse);
+            }
+
+            dbContext.Remove(warehouse);
+
+            dbContext.SaveChanges();
+
+            var successDeleteResponse = new CustomizedResponse
+            {
+                Success = true,
+                Message = "The changes has been successfully deleted.",
+            };
+
+            return new JsonResult(successDeleteResponse);
         }
 
     }
