@@ -101,7 +101,13 @@ namespace DominionWarehouseAPI.Controllers
 
             dbContext.SaveChanges();
 
-            return Ok(existingWarehouse);
+            var successEditResponse = new CustomizedResponse
+            {
+                Success = true,
+                Message = "The changes has been successfully registered.",
+            };
+
+            return new JsonResult(successEditResponse);
         }
 
     }
