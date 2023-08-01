@@ -50,7 +50,9 @@ namespace DominionWarehouseAPI.Controllers
             {
                 Username = request.Username,
                 PasswordHash = passwordHash,
-                WorksAt = request.WorksAt
+                WorksAt = request.WorksAt,
+                RoleId = request.RoleId,
+                
             };
 
             dbContext.Users.Add(newUser);
@@ -80,7 +82,7 @@ namespace DominionWarehouseAPI.Controllers
                 return new JsonResult(failResponse);
             }
 
-            var user = dbContext.Users.FirstOrDefault(user => user.Username == request.Username);
+            var user = dbContext.Users.Include(u => u.Role).FirstOrDefault(user => user.Username == request.Username);
 
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             {
@@ -156,7 +158,8 @@ namespace DominionWarehouseAPI.Controllers
         {
             List<Claim> claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.Username)
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Role,user.Role.RoleName)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value!));

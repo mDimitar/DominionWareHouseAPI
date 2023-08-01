@@ -14,5 +14,9 @@ namespace DominionWarehouseAPI.Models
         public string WorksAt { get; set; }
         [JsonIgnore]
         public string PasswordHash { get; set; } = string.Empty;
+
+        [ForeignKey("Roles")]
+        public int RoleId { get; set; }
+        public Roles Role { get; set; }
     }
 }

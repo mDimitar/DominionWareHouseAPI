@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DominionWarehouseAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20230801172820_added WorksAt table Cell")]
-    partial class addedWorksAttableCell
+    [Migration("20230801191751_selfinvrementRoleId")]
+    partial class selfinvrementRoleId
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,6 +23,22 @@ namespace DominionWarehouseAPI.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("DominionWarehouseAPI.Models.Roles", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles");
+                });
 
             modelBuilder.Entity("DominionWarehouseAPI.Models.User", b =>
                 {
@@ -36,6 +52,9 @@ namespace DominionWarehouseAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -45,6 +64,9 @@ namespace DominionWarehouseAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("RoleId")
+                        .IsUnique();
 
                     b.ToTable("Users", (string)null);
                 });
@@ -73,6 +95,17 @@ namespace DominionWarehouseAPI.Migrations
                     b.HasIndex("userId");
 
                     b.ToTable("Warehouse", (string)null);
+                });
+
+            modelBuilder.Entity("DominionWarehouseAPI.Models.User", b =>
+                {
+                    b.HasOne("DominionWarehouseAPI.Models.Roles", "Role")
+                        .WithOne()
+                        .HasForeignKey("DominionWarehouseAPI.Models.User", "RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("DominionWarehouseAPI.Models.Warehouse", b =>
