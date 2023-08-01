@@ -1,9 +1,12 @@
-﻿using DominionWarehouseAPI.Database;
+﻿using Azure.Core;
+using DominionWarehouseAPI.Database;
 using DominionWarehouseAPI.Models;
 using DominionWarehouseAPI.Models.Data_Transfer_Objects;
 using DominionWarehouseAPI.Response;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -171,6 +174,49 @@ namespace DominionWarehouseAPI.Controllers
             return jwt;
 
         }
+
+        //edit user
+
+        [HttpPut("EditUser/{id}"),Authorize]
+        public IActionResult EditUser(int id, [FromBody] UserDTOforRegistering userDTO)
+        {
+            var user = dbContext.Users.FirstOrDefault(u => u.Id == id);
+
+            string NewPasswordHash = BCrypt.Net.BCrypt.HashPassword(userDTO.Password);
+
+            user.Username = userDTO.Username;
+            user.WorksAt = userDTO.WorksAt;
+            user.PasswordHash = NewPasswordHash;
+
+            dbContext.SaveChanges();
+
+            var successResponse = new CustomizedResponse
+            {
+                Success = true,
+                Message = "The user data has been successfully updated.",
+            };
+
+            return new JsonResult(successResponse);
+        }
+
+        [HttpDelete("DeleteUser/{id}"), Authorize]
+        public IActionResult DeleteUser(int id)
+        {
+            var user = dbContext.Users.FirstOrDefault(u => u.Id == id);
+
+            dbContext.Remove(user);
+
+            dbContext.SaveChanges();
+
+            var successResponse = new CustomizedResponse
+            {
+                Success = true,
+                Message = "The user has been successfully deleted.",
+            };
+
+            return new JsonResult(successResponse);
+        }
+
 
     }
 
