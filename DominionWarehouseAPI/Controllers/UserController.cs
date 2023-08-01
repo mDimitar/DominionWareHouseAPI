@@ -25,7 +25,7 @@ namespace DominionWarehouseAPI.Controllers
         }
 
         [HttpPost("Register")]
-        public ActionResult<User> Register(UserDTO request)
+        public ActionResult<User> Register(UserDTOforRegistering request)
         {
             var userExists = dbContext.Users.Any(user => user.Username == request.Username);
 
@@ -46,7 +46,8 @@ namespace DominionWarehouseAPI.Controllers
             var newUser = new User
             {
                 Username = request.Username,
-                PasswordHash = passwordHash
+                PasswordHash = passwordHash,
+                WorksAt = request.WorksAt
             };
 
             dbContext.Users.Add(newUser);
@@ -62,7 +63,7 @@ namespace DominionWarehouseAPI.Controllers
         }
 
         [HttpPost("Login")]
-        public ActionResult<User> Login(UserDTO request)
+        public ActionResult<User> Login(UserDTOforLogin request)
         {
             var userExists = dbContext.Users.Any(user => user.Username == request.Username);
 

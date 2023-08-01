@@ -8,12 +8,11 @@ namespace DominionWarehouseAPI.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [JsonIgnore]
         public int Id { get; set; }
         public string Name { get; set; }
         public string Address { get; set; }
-
         [Required]
+        [JsonIgnore]
         public int userId { get; set; }
         public virtual User User{ get; set; }
     }

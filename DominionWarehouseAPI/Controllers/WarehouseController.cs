@@ -27,7 +27,7 @@ namespace DominionWarehouseAPI.Controllers
         [HttpGet("Warehouses")]
         public async Task<ActionResult<Warehouse>> GetAllWarehouses()
         {
-            var warehouses = await dbContext.Warehouse.ToListAsync();
+            var warehouses = await dbContext.Warehouse.Include(w => w.User).ToListAsync();
             if (warehouses.IsNullOrEmpty())
             {
                 return BadRequest("warehouse empty");
@@ -87,6 +87,21 @@ namespace DominionWarehouseAPI.Controllers
 
                 return new JsonResult(unauthorizedResponse);
             }
+        }
+
+        //edit option
+
+        [HttpPut("EditWarehouse/{id}")]
+        public IActionResult EditWarehouse(int id, [FromBody] WarehouseDTO updatedWarehouseDTO)
+        {
+            var existingWarehouse = dbContext.Warehouse.Include(w => w.User).FirstOrDefault(w => w.Id == id);
+
+            existingWarehouse.Name = updatedWarehouseDTO.Name;
+            existingWarehouse.Address = updatedWarehouseDTO.Address;
+
+            dbContext.SaveChanges();
+
+            return Ok(existingWarehouse);
         }
 
     }
