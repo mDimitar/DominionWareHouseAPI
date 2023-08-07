@@ -4,6 +4,7 @@ using DominionWarehouseAPI.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DominionWarehouseAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230805183758_fixedDBSetforProducts")]
+    partial class fixedDBSetforProducts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,14 +55,11 @@ namespace DominionWarehouseAPI.Migrations
                     b.Property<int>("ShoppingCartId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
                     b.HasKey("ProductId", "ShoppingCartId");
 
                     b.HasIndex("ShoppingCartId");
 
-                    b.ToTable("ProductsInShoppingCarts");
+                    b.ToTable("ProductsInShoppingCart");
                 });
 
             modelBuilder.Entity("DominionWarehouseAPI.Models.Roles", b =>
@@ -110,8 +110,7 @@ namespace DominionWarehouseAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("RoleId")
-                        .IsRequired()
+                    b.Property<int>("RoleId")
                         .HasColumnType("int");
 
                     b.Property<int?>("ShoppingCartId")
@@ -127,7 +126,8 @@ namespace DominionWarehouseAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RoleId");
+                    b.HasIndex("RoleId")
+                        .IsUnique();
 
                     b.ToTable("Users", (string)null);
                 });
@@ -191,8 +191,8 @@ namespace DominionWarehouseAPI.Migrations
             modelBuilder.Entity("DominionWarehouseAPI.Models.User", b =>
                 {
                     b.HasOne("DominionWarehouseAPI.Models.Roles", "Role")
-                        .WithMany("Users")
-                        .HasForeignKey("RoleId")
+                        .WithOne()
+                        .HasForeignKey("DominionWarehouseAPI.Models.User", "RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -213,11 +213,6 @@ namespace DominionWarehouseAPI.Migrations
             modelBuilder.Entity("DominionWarehouseAPI.Models.Product", b =>
                 {
                     b.Navigation("ProductShoppingCarts");
-                });
-
-            modelBuilder.Entity("DominionWarehouseAPI.Models.Roles", b =>
-                {
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("DominionWarehouseAPI.Models.ShoppingCart", b =>

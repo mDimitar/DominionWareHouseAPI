@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace DominionWarehouseAPI.Controllers
 {
@@ -28,6 +29,16 @@ namespace DominionWarehouseAPI.Controllers
         {
             var roles = dbContext.Roles.ToList();
 
+            if(roles.IsNullOrEmpty())
+            {
+                var failedResponse = new CustomizedResponse
+                {
+                    Success = false,
+                    Message = "No roles can be found in the database.",
+                };
+                return new JsonResult(failedResponse);
+            }
+
             return Ok(roles);
         }
 
@@ -39,7 +50,12 @@ namespace DominionWarehouseAPI.Controllers
 
             if(existingRole)
             {
-                return BadRequest("role already exists");
+                var failedResponse = new CustomizedResponse
+                {
+                    Success = false,
+                    Message = "The role already exists."
+                };
+                return new JsonResult(failedResponse);
             }
 
             var newRole = new Roles

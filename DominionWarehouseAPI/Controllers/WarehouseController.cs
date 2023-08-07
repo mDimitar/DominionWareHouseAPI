@@ -12,7 +12,7 @@ namespace DominionWarehouseAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(Roles = "OWNER,ADMIN")]
     public class WarehouseController : ControllerBase
     {
         private readonly AppDbContext dbContext;
@@ -27,7 +27,29 @@ namespace DominionWarehouseAPI.Controllers
         [HttpGet("Warehouses")]
         public async Task<ActionResult<Warehouse>> GetAllWarehouses()
         {
-            var warehouses = await dbContext.Warehouse.Include(w => w.User).ToListAsync();
+
+            string username = User.FindFirstValue(ClaimTypes.Name);
+
+            var user = dbContext.Users.FirstOrDefault(u => u.Username == username);
+
+            if (user.RoleId == 1)
+            {
+                var allWarehouses = dbContext.Warehouse.Include(u => u.User).ToList();
+
+                if (allWarehouses.IsNullOrEmpty())
+                {
+                    var failedResponse = new CustomizedResponse
+                    {
+                        Success = false,
+                        Message = "No warehouses found in the database."
+                    };
+                    return new JsonResult(failedResponse);
+                }
+                    
+                return Ok(dbContext.Warehouse.Include(u => u.User).ToList());
+            }
+
+            var warehouses = await dbContext.Warehouse.Where(w => w.userId == user.Id).ToListAsync();
 
             if (warehouses.IsNullOrEmpty())
             {

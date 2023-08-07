@@ -16,7 +16,12 @@ namespace DominionWarehouseAPI.Models
         public string PasswordHash { get; set; } = string.Empty;
 
         [ForeignKey("Roles")]
-        public int RoleId { get; set; }
+        public int? RoleId { get; set; }
         public Roles Role { get; set; }
+
+        [ForeignKey("ShoppingCart")]
+        public int? ShoppingCartId { get; set; }
+        public ShoppingCart ShoppingCart { get; set; }
+
     }
 }

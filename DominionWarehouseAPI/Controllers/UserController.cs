@@ -27,6 +27,34 @@ namespace DominionWarehouseAPI.Controllers
             _configuration = configuration;
         }
 
+        [HttpGet("AllUsers")]
+        [Authorize(Roles = "ADMIN")]
+        public ActionResult<User> GetAllUsers()
+        {
+            var users = dbContext.Users
+            .Include(user => user.Role)
+            .Select(user => new
+            {
+                user.Id,
+                user.Username,
+                user.WorksAt,
+                RoleName = user.Role.RoleName
+            })
+            .ToList(); ;
+
+            if(users.IsNullOrEmpty())
+            {
+                var failResponse = new CustomizedResponse
+                {
+                    Success = false,
+                    Message = "There are no users currently in the database"
+                };
+                return BadRequest(failResponse);
+            }
+            return Ok(users);
+        }
+
+
         [HttpPost("Register")]
         public ActionResult<User> Register(UserDTOforRegistering request)
         {
@@ -109,7 +137,7 @@ namespace DominionWarehouseAPI.Controllers
 
         //validation starts here
 
-        [HttpPost]
+        /*[HttpPost]
         [Route("VerifyToken")]
         public IActionResult VerifyToken([FromBody] string token)
         {
@@ -149,7 +177,7 @@ namespace DominionWarehouseAPI.Controllers
 
                 return new JsonResult(failResponse);
             }
-        }
+        }*/
 
         //and ends here
 
@@ -180,7 +208,8 @@ namespace DominionWarehouseAPI.Controllers
 
         //edit user
 
-        [HttpPut("EditUser/{id}"),Authorize]
+        [HttpPut("EditUser/{id}")]
+        [Authorize(Roles = "ADMIN,OWNER")]
         public IActionResult EditUser(int id, [FromBody] UserDTOforRegistering userDTO)
         {
             var user = dbContext.Users.FirstOrDefault(u => u.Id == id);
@@ -202,7 +231,8 @@ namespace DominionWarehouseAPI.Controllers
             return new JsonResult(successResponse);
         }
 
-        [HttpDelete("DeleteUser/{id}"), Authorize]
+        [HttpDelete("DeleteUser/{id}")]
+        [Authorize(Roles = "OWNER,ADMIN")]
         public IActionResult DeleteUser(int id)
         {
             var user = dbContext.Users.FirstOrDefault(u => u.Id == id);
