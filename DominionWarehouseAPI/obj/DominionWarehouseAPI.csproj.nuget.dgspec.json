@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\DominionWarehouseAPI\\DominionWarehouseAPI\\DominionWarehouseAPI.csproj": {}
+    "D:\\DominionWarehouseAPI\\DominionWareHouseAPI\\DominionWarehouseAPI\\DominionWarehouseAPI.csproj": {}
   },
   "projects": {
-    "D:\\DominionWarehouseAPI\\DominionWarehouseAPI\\DominionWarehouseAPI.csproj": {
+    "D:\\DominionWarehouseAPI\\DominionWareHouseAPI\\DominionWarehouseAPI\\DominionWarehouseAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\DominionWarehouseAPI\\DominionWarehouseAPI\\DominionWarehouseAPI.csproj",
+        "projectUniqueName": "D:\\DominionWarehouseAPI\\DominionWareHouseAPI\\DominionWarehouseAPI\\DominionWarehouseAPI.csproj",
         "projectName": "DominionWarehouseAPI",
-        "projectPath": "D:\\DominionWarehouseAPI\\DominionWarehouseAPI\\DominionWarehouseAPI.csproj",
+        "projectPath": "D:\\DominionWarehouseAPI\\DominionWareHouseAPI\\DominionWarehouseAPI\\DominionWarehouseAPI.csproj",
         "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
-        "outputPath": "D:\\DominionWarehouseAPI\\DominionWarehouseAPI\\obj\\",
+        "outputPath": "D:\\DominionWarehouseAPI\\DominionWareHouseAPI\\DominionWarehouseAPI\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\PC\\AppData\\Roaming\\NuGet\\NuGet.Config",
