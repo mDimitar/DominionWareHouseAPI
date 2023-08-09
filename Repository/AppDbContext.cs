@@ -19,10 +19,10 @@ namespace DominionWarehouseAPI.Database
 
         public DbSet<ProductsInShoppingCart> ProductsInShoppingCarts { get; set; }
 
-
         public DbSet<Category> Categories { get; set; }
 
         public DbSet<Order> Orders { get; set; }
+        public DbSet<ProductsInWarehouse> ProductsInWarehouses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
