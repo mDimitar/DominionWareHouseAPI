@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DominionWarehouseAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20230809083110_addedQuantityInProdsWH")]
-    partial class addedQuantityInProdsWH
+    [Migration("20230811154809_ChangedToInt")]
+    partial class ChangedToInt
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -131,11 +131,15 @@ namespace DominionWarehouseAPI.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
+                    b.Property<string>("Received")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("WarehouseId", "ProductId");
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductsInWarehouse");
+                    b.ToTable("ProductsInWarehouses");
                 });
 
             modelBuilder.Entity("DominionWarehouseAPI.Models.Roles", b =>
@@ -197,9 +201,8 @@ namespace DominionWarehouseAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("WorksAt")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("WorksAtWarehouse")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

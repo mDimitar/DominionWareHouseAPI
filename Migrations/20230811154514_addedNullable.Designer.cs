@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DominionWarehouseAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20230808154448_removedRelation")]
-    partial class removedRelation
+    [Migration("20230811154514_addedNullable")]
+    partial class addedNullable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -54,6 +54,12 @@ namespace DominionWarehouseAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("OrderStatus")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ShoppingCartId")
+                        .HasColumnType("int");
+
                     b.Property<int>("TotalSum")
                         .HasColumnType("int");
 
@@ -61,6 +67,8 @@ namespace DominionWarehouseAPI.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ShoppingCartId");
 
                     b.HasIndex("UserId");
 
@@ -120,11 +128,18 @@ namespace DominionWarehouseAPI.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Received")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("WarehouseId", "ProductId");
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductsInWarehouse");
+                    b.ToTable("ProductsInWarehouses");
                 });
 
             modelBuilder.Entity("DominionWarehouseAPI.Models.Roles", b =>
@@ -187,7 +202,6 @@ namespace DominionWarehouseAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("WorksAt")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -225,11 +239,19 @@ namespace DominionWarehouseAPI.Migrations
 
             modelBuilder.Entity("DominionWarehouseAPI.Models.Order", b =>
                 {
+                    b.HasOne("DominionWarehouseAPI.Models.ShoppingCart", "ShoppingCart")
+                        .WithMany("Orders")
+                        .HasForeignKey("ShoppingCartId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("DominionWarehouseAPI.Models.User", "User")
                         .WithMany("Orders")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("ShoppingCart");
 
                     b.Navigation("User");
                 });
@@ -335,6 +357,8 @@ namespace DominionWarehouseAPI.Migrations
 
             modelBuilder.Entity("DominionWarehouseAPI.Models.ShoppingCart", b =>
                 {
+                    b.Navigation("Orders");
+
                     b.Navigation("ProductShoppingCarts");
                 });
 

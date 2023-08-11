@@ -4095,11 +4095,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\DominionWarehouseAPI\\DominionWareHouseAPI\\DominionWarehouseAPI.csproj",
+      "projectUniqueName": "D:\\DominionWareHouseAPI\\DominionWarehouseAPI.csproj",
       "projectName": "DominionWarehouseAPI",
-      "projectPath": "D:\\DominionWarehouseAPI\\DominionWareHouseAPI\\DominionWarehouseAPI.csproj",
+      "projectPath": "D:\\DominionWareHouseAPI\\DominionWarehouseAPI.csproj",
       "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
-      "outputPath": "D:\\DominionWarehouseAPI\\DominionWareHouseAPI\\obj\\",
+      "outputPath": "D:\\DominionWareHouseAPI\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\PC\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -4110,7 +4110,6 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\sdk\\7.0.306\\Sdks\\Microsoft.NET.Sdk.Web\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -4179,7 +4178,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.306\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.400\\RuntimeIdentifierGraph.json"
       }
     }
   }

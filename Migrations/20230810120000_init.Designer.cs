@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DominionWarehouseAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20230808153831_init")]
+    [Migration("20230810120000_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -50,10 +50,25 @@ namespace DominionWarehouseAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OrderStatus")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ShoppingCartId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalSum")
+                        .HasColumnType("int");
+
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ShoppingCartId");
 
                     b.HasIndex("UserId");
 
@@ -95,16 +110,10 @@ namespace DominionWarehouseAPI.Migrations
                     b.Property<int>("ShoppingCartId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("OrderId")
-                        .IsRequired()
-                        .HasColumnType("int");
-
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
                     b.HasKey("ProductId", "ShoppingCartId");
-
-                    b.HasIndex("OrderId");
 
                     b.HasIndex("ShoppingCartId");
 
@@ -119,11 +128,18 @@ namespace DominionWarehouseAPI.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Received")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("WarehouseId", "ProductId");
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductsInWarehouse");
+                    b.ToTable("ProductsInWarehouses");
                 });
 
             modelBuilder.Entity("DominionWarehouseAPI.Models.Roles", b =>
@@ -224,11 +240,19 @@ namespace DominionWarehouseAPI.Migrations
 
             modelBuilder.Entity("DominionWarehouseAPI.Models.Order", b =>
                 {
+                    b.HasOne("DominionWarehouseAPI.Models.ShoppingCart", "ShoppingCart")
+                        .WithMany("Orders")
+                        .HasForeignKey("ShoppingCartId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("DominionWarehouseAPI.Models.User", "User")
                         .WithMany("Orders")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("ShoppingCart");
 
                     b.Navigation("User");
                 });
@@ -246,12 +270,6 @@ namespace DominionWarehouseAPI.Migrations
 
             modelBuilder.Entity("DominionWarehouseAPI.Models.ProductsInShoppingCart", b =>
                 {
-                    b.HasOne("DominionWarehouseAPI.Models.Order", "Order")
-                        .WithMany("ProductsInShoppingCarts")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("DominionWarehouseAPI.Models.Product", "Product")
                         .WithMany("ProductShoppingCarts")
                         .HasForeignKey("ProductId")
@@ -263,8 +281,6 @@ namespace DominionWarehouseAPI.Migrations
                         .HasForeignKey("ShoppingCartId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Order");
 
                     b.Navigation("Product");
 
@@ -328,11 +344,6 @@ namespace DominionWarehouseAPI.Migrations
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("DominionWarehouseAPI.Models.Order", b =>
-                {
-                    b.Navigation("ProductsInShoppingCarts");
-                });
-
             modelBuilder.Entity("DominionWarehouseAPI.Models.Product", b =>
                 {
                     b.Navigation("ProductShoppingCarts");
@@ -347,6 +358,8 @@ namespace DominionWarehouseAPI.Migrations
 
             modelBuilder.Entity("DominionWarehouseAPI.Models.ShoppingCart", b =>
                 {
+                    b.Navigation("Orders");
+
                     b.Navigation("ProductShoppingCarts");
                 });
 

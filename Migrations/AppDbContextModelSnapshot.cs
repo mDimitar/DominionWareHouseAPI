@@ -198,9 +198,8 @@ namespace DominionWarehouseAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("WorksAt")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("WorksAtWarehouse")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

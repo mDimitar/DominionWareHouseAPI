@@ -99,9 +99,6 @@ namespace DominionWarehouseAPI.Database
 
 
         }
-        
-            
-
         public override int SaveChanges()
         {
             // Check for new users being added

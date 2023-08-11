@@ -36,7 +36,7 @@ namespace DominionWarehouseAPI.Controllers
             {
                 user.Id,
                 user.Username,
-                user.WorksAt,
+                user.WorksAtWarehouse,
                 RoleName = user.Role.RoleName
             })
             .ToList(); ;
@@ -77,9 +77,8 @@ namespace DominionWarehouseAPI.Controllers
             {
                 Username = request.Username,
                 PasswordHash = passwordHash,
-                WorksAt = request.WorksAt,
+                WorksAtWarehouse = request.WorksAtWarehouse,
                 RoleId = request.RoleId,
-                
             };
 
             dbContext.Users.Add(newUser);
@@ -216,7 +215,7 @@ namespace DominionWarehouseAPI.Controllers
             string NewPasswordHash = BCrypt.Net.BCrypt.HashPassword(userDTO.Password);
 
             user.Username = userDTO.Username;
-            user.WorksAt = userDTO.WorksAt;
+            user.WorksAtWarehouse = userDTO.WorksAtWarehouse;
             user.PasswordHash = NewPasswordHash;
 
             dbContext.SaveChanges();

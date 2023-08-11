@@ -96,6 +96,9 @@ namespace DominionWarehouseAPI.Controllers
                 dbContext.Warehouse.Add(newWarehouse);
                 dbContext.SaveChanges();
 
+                user.WorksAtWarehouse = newWarehouse.Id;
+                dbContext.SaveChanges();
+
                 var successfullResponse = new
                 {
                     Success = true,

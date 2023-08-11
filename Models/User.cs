@@ -10,8 +10,9 @@ namespace DominionWarehouseAPI.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string Username { get; set; } = string.Empty;
+
         [JsonIgnore]
-        public string WorksAt { get; set; }
+        public int? WorksAtWarehouse { get; set; }
         [JsonIgnore]
         public string PasswordHash { get; set; } = string.Empty;
 
