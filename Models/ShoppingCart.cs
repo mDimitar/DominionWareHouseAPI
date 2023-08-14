@@ -16,6 +16,6 @@ namespace DominionWarehouseAPI.Models
         public User User { get; set; }
         public ICollection<ProductsInShoppingCart> ProductShoppingCarts { get; set; }
         public ICollection<Order> Orders { get; set; } = new List<Order>();
-
+        public int TotalPrice { get; set; }
     }
 }

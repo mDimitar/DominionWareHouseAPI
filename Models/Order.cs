@@ -18,10 +18,16 @@ namespace DominionWarehouseAPI.Models
 
         public string Comment { get; set; }
 
-        public OrderStatus OrderStatus { get; set; }
+        public OrderStatus OrderStatus { get; set; } = OrderStatus.Pending;
 
         [ForeignKey("ShoppingCart")]
         public int ShoppingCartId { get; set; }
         public ShoppingCart ShoppingCart { get; set; }
+
+        public int soldFromWarehouseId { get; set; }
+
+        public int soldFromEmployeeId { get; set; }
+
+        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
     }
 }

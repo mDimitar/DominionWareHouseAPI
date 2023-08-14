@@ -13,6 +13,6 @@ namespace DominionWarehouseAPI.Models
         public ShoppingCart ShoppingCart { get; set; }
         //quantity logic tbd
         public int Quantity { get; set; }
-        
+
     }
 }

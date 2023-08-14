@@ -78,6 +78,8 @@ namespace DominionWarehouseAPI.Controllers
                 var existingProduct = shoppingCart.ProductShoppingCarts
                     .FirstOrDefault(psc => psc.ProductId == productDTO.ProductId);
 
+
+
                 if (existingProduct != null)
                 {
                     
@@ -92,7 +94,14 @@ namespace DominionWarehouseAPI.Controllers
                         Quantity = productDTO.Quantity
                     };
                     shoppingCart.ProductShoppingCarts.Add(productInCart);
+                    
+                    var addedProduct = dbContext.Products.FirstOrDefault(p => p.Id == productDTO.ProductId);
+
+                    shoppingCart.TotalPrice = addedProduct.ProductPrice * productDTO.Quantity;
+
+
                 }
+
 
                 await dbContext.SaveChangesAsync();
 

@@ -60,7 +60,8 @@ namespace DominionWarehouseAPI.Controllers
             {
                 ProductName = request.ProductName,
                 ProductDescription = request.ProductDescription,
-                CategoryId = request.CategoryId
+                CategoryId = request.CategoryId,
+                ProductPrice = request.ProductPrice,
             };
 
             dbContext.Products.Add(newProduct);
@@ -95,6 +96,7 @@ namespace DominionWarehouseAPI.Controllers
 
             productToBeEdited.ProductName = request.ProductName;
             productToBeEdited.ProductDescription = request.ProductDescription; 
+            productToBeEdited.ProductPrice = request.ProductPrice;
 
             dbContext.SaveChanges();
 
