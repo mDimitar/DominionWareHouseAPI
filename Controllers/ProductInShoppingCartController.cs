@@ -33,6 +33,7 @@ namespace DominionWarehouseAPI.Controllers
             var user = dbContext.Users.Include(sc => sc.ShoppingCart).FirstOrDefault(u => u.Username == username);
 
             var query = from psc in dbContext.ProductsInShoppingCarts
+                        .Where(sc => sc.ShoppingCartId == user.ShoppingCartId)
                         join product in dbContext.Products
                         on psc.ProductId equals product.Id
                         select new ShoppingCartInfoReturn
