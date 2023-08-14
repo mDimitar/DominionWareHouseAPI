@@ -84,6 +84,8 @@ namespace DominionWarehouseAPI.Controllers
                 {
                     
                     existingProduct.Quantity += productDTO.Quantity;
+                    var prod = dbContext.Products.FirstOrDefault(p => p.Id == existingProduct.ProductId);
+                    shoppingCart.TotalPrice = prod.ProductPrice * productDTO.Quantity;
                 }
                 else
                 {
