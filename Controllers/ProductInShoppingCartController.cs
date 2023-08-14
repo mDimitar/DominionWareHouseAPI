@@ -83,9 +83,19 @@ namespace DominionWarehouseAPI.Controllers
                 if (existingProduct != null)
                 {
                     
-                    existingProduct.Quantity += productDTO.Quantity;
-                    var prod = dbContext.Products.FirstOrDefault(p => p.Id == existingProduct.ProductId);
-                    shoppingCart.TotalPrice = prod.ProductPrice * productDTO.Quantity;
+                    if(existingProduct.Quantity > productDTO.Quantity)
+                    {
+                        existingProduct.Quantity = productDTO.Quantity;
+                        var fetchprod = dbContext.Products.FirstOrDefault(p => p.Id == existingProduct.ProductId);
+                        shoppingCart.TotalPrice = fetchprod.ProductPrice * productDTO.Quantity;
+                        await dbContext.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        existingProduct.Quantity += productDTO.Quantity;
+                        var prod = dbContext.Products.FirstOrDefault(p => p.Id == existingProduct.ProductId);
+                        shoppingCart.TotalPrice = prod.ProductPrice * productDTO.Quantity;
+                    }
                 }
                 else
                 {
