@@ -3,5 +3,6 @@
     public class OrderDTO
     {
         public string Comment { get; set; }
+        public int soldFromWarehouseId { get; set; }
     }
 }

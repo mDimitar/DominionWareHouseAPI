@@ -61,6 +61,11 @@ namespace DominionWarehouseAPI.Controllers
         {
             try
             {
+                if(productDTO.Quantity < 0 || productDTO.Quantity == 0)
+                {
+                    return BadRequest("Quantity of 0 or less cannot be added to the shopping cart.");
+                }
+
                 var product = await dbContext.Products.FindAsync(productDTO.ProductId);
                 if (product == null)
                 {
@@ -130,6 +135,28 @@ namespace DominionWarehouseAPI.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred.");
             }
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteProductFromShoppingCart(int ProductId)
+        {
+
+            string username = User.FindFirstValue(ClaimTypes.Name);
+            var user = dbContext.Users.FirstOrDefault(u => u.Username == username);
+
+            if (user == null)
+            {
+                return BadRequest("User cannot be found");
+            }
+
+            var userProdsInSc = await dbContext.ProductsInShoppingCarts.
+                Where(sc => sc.ProductId == ProductId && sc.ShoppingCartId == user.ShoppingCartId)
+                .FirstOrDefaultAsync();
+
+            dbContext.ProductsInShoppingCarts.Remove(userProdsInSc);
+            dbContext.SaveChanges();
+
+            return Ok("Success");
         }
     }
 }

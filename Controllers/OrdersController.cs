@@ -61,15 +61,20 @@ namespace DominionWarehouseAPI.Controllers
                 Comment = request.Comment,
                 TotalSum = user.ShoppingCart.TotalPrice,
                 ShoppingCartId = user.ShoppingCart.Id,
-                soldFromWarehouseId = null,
+                soldFromWarehouseId = request.soldFromWarehouseId,
                 soldFromEmployeeId = null
             };
 
             dbContext.Orders.Add(neworder);
             dbContext.SaveChanges();
 
+            var rectToDelete = dbContext.ProductsInShoppingCarts.Where(sc => sc.ShoppingCartId == user.ShoppingCartId).ToList();
 
-            return null;
+            dbContext.ProductsInShoppingCarts.RemoveRange(rectToDelete);
+            dbContext.SaveChanges();
+
+
+            return Ok("success write");
         }
     }
 }

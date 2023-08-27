@@ -24,7 +24,7 @@ namespace DominionWarehouseAPI.Models
         public int ShoppingCartId { get; set; }
         public ShoppingCart ShoppingCart { get; set; }
 
-        public int? soldFromWarehouseId { get; set; }
+        public int soldFromWarehouseId { get; set; }
 
         public int? soldFromEmployeeId { get; set; }
 
