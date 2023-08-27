@@ -12,5 +12,6 @@ namespace DominionWarehouseAPI.Models
         public Product Product { get; set; }
         public int Quantity { get; set; }
         public string Received { get; set; }
+        public int ProductPriceForSelling { get; set; }
     }
 }

@@ -137,7 +137,7 @@ namespace DominionWarehouseAPI.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("DeleteProductFromShoppingCart")]
         public async Task<IActionResult> DeleteProductFromShoppingCart(int ProductId)
         {
 

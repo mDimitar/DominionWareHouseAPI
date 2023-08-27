@@ -28,7 +28,9 @@ namespace DominionWarehouseAPI.Models
         [JsonIgnore]
         public Category Category { get; set; }
 
-        public int ProductPrice { get; set; }
+        public string ProductImageURL { get; set; }
+
+        public int ProductPrice { get; set; } 
 
     }
 }

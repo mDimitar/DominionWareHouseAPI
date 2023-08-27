@@ -6,5 +6,7 @@
         public string ProductDescription { get; set; }
         public int CategoryId { get; set; }
         public int ProductPrice { get; set; }
+        public string ImageURL { get; set; }
+
     }
 }
