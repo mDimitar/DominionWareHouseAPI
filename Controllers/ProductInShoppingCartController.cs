@@ -41,10 +41,17 @@ namespace DominionWarehouseAPI.Controllers
                             Id = product.Id,
                             ProductName = product.ProductName,
                             ProductDescription = product.ProductDescription,
-                            Quantity = psc.Quantity
+                            Quantity = psc.Quantity,
+                            TotalPrice = user.ShoppingCart.TotalPrice
                         };
 
-            if (query.IsNullOrEmpty())
+            var returnAnswer = new
+            {
+                Products = query,
+                TotalPrice = user.ShoppingCart.TotalPrice
+            };
+
+            if (returnAnswer.Products.IsNullOrEmpty())
             {
                 return new JsonResult(new
                 {
@@ -53,7 +60,7 @@ namespace DominionWarehouseAPI.Controllers
                 });
             }
 
-            return Ok(query.ToList());
+            return Ok(returnAnswer);
         }
 
         [HttpPost("AddProductToShoppingCart")]
