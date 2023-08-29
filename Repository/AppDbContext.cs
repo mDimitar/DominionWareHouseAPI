@@ -97,6 +97,14 @@ namespace DominionWarehouseAPI.Database
             .HasForeignKey(o => o.ShoppingCartId)
             .OnDelete(DeleteBehavior.Restrict);
 
+            //convert to string of enums
+            modelBuilder.Entity<Order>(entity =>
+            {
+                // Map the enum to a string column
+                entity.Property(e => e.OrderStatus)
+                    .HasConversion<string>();
+            });
+
 
         }
         public override int SaveChanges()

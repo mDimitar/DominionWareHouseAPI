@@ -41,8 +41,7 @@ namespace DominionWarehouseAPI.Controllers
                             Id = product.Id,
                             ProductName = product.ProductName,
                             ProductDescription = product.ProductDescription,
-                            Quantity = psc.Quantity,
-                            TotalPrice = user.ShoppingCart.TotalPrice
+                            Quantity = psc.Quantity
                         };
 
             var returnAnswer = new

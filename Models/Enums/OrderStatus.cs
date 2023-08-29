@@ -1,10 +1,14 @@
-﻿namespace DominionWarehouseAPI.Models.Enums
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace DominionWarehouseAPI.Models.Enums
 {
     public enum OrderStatus
     {
-        Pending,
+        [Display(Name = "Processing")]
         Processing,
-        Delivered,
+        [Display(Name = "Shipped")]
+        Shipped,
+        [Display(Name = "Canceled")]
         Canceled
     }
 }

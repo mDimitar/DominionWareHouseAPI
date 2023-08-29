@@ -1,8 +1,8 @@
 ﻿using DominionWarehouseAPI.Database;
 using DominionWarehouseAPI.Models;
 using DominionWarehouseAPI.Models.Data_Transfer_Objects;
+using DominionWarehouseAPI.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -28,7 +28,20 @@ namespace DominionWarehouseAPI.Controllers
         [HttpGet("GetAllOrders")]
         public IActionResult GetAllOrders()
         {
-            var orders = dbContext.Orders.Include(u => u.User).ToList();
+            var orders = dbContext.Orders
+                .Select(order => new
+                {
+                    Id = order.Id,
+                    UserId = order.UserId,
+                    TotalSum = order.TotalSum,
+                    Comment = order.Comment,
+                    OrderStatus = order.OrderStatus,
+                    ShoppingCartId = order.ShoppingCartId,
+                    soldFromWarehouseId = order.soldFromWarehouseId,
+                    soldFromEmployeeId = order.soldFromEmployeeId,
+                    DateCreated = order.DateCreated
+                })
+                .ToList();
 
             if (orders.IsNullOrEmpty())
             {
@@ -50,9 +63,9 @@ namespace DominionWarehouseAPI.Controllers
 
             var user = dbContext.Users.Include(u => u.ShoppingCart).FirstOrDefault(u => u.Username == username);
 
-            if(user == null)
+            if (user == null)
             {
-                return BadRequest("not authorized");
+                return BadRequest("You must be authorized");
             }
 
             var neworder = new Order
@@ -60,6 +73,7 @@ namespace DominionWarehouseAPI.Controllers
                 UserId = user.Id,
                 Comment = request.Comment,
                 TotalSum = user.ShoppingCart.TotalPrice,
+                OrderStatus = OrderStatus.Processing,
                 ShoppingCartId = user.ShoppingCart.Id,
                 soldFromWarehouseId = request.soldFromWarehouseId,
                 soldFromEmployeeId = null //later to be assigned when finalizing order
@@ -68,17 +82,19 @@ namespace DominionWarehouseAPI.Controllers
             dbContext.Orders.Add(neworder);
             dbContext.SaveChanges();
 
-
-            return Ok("success write");
+            return Ok(new { Success = true, Message = "The order has been created succesfully." });
         }
 
         [HttpPut("FinalizeOrder/{id}")]
         public async Task<IActionResult> FinalizeOrder(int id)
         {
+            string username = User.FindFirstValue(ClaimTypes.Name);
+
+            var user = dbContext.Users.Include(u => u.ShoppingCart).FirstOrDefault(u => u.Username == username);
 
             var order = dbContext.Orders.SingleOrDefault(o => o.Id == id);
 
-            if(order == null)
+            if (order == null)
             {
                 return BadRequest("Order not found");
             }
@@ -88,20 +104,25 @@ namespace DominionWarehouseAPI.Controllers
             var prodsInSc = dbContext.ProductsInShoppingCarts.Include(p => p.Product).
                 Where(psc => psc.ShoppingCartId == shoppingCartId).ToList();
 
-           
+            var prodsInWarehouse = dbContext.Products.ToList();
 
-            foreach(var prod in prodsInSc)
+            foreach (var prod in prodsInSc)
             {
-
+                var product = dbContext.ProductsInWarehouses.SingleOrDefault(p => p.Product.Id == prod.ProductId);
+                product.Quantity -= prod.Quantity;
+                dbContext.SaveChanges();
             }
 
-            return null;
+            order.OrderStatus = OrderStatus.Shipped;
+            order.soldFromEmployeeId = user.Id;
+            dbContext.SaveChanges();
 
-
-            /*var rectToDelete = dbContext.ProductsInShoppingCarts.Where(sc => sc.ShoppingCartId == user.ShoppingCartId).ToList();
+            var rectToDelete = dbContext.ProductsInShoppingCarts.Where(sc => sc.ShoppingCartId == user.ShoppingCartId).ToList();
 
             dbContext.ProductsInShoppingCarts.RemoveRange(rectToDelete);
-            dbContext.SaveChanges();*/
+            dbContext.SaveChanges();
+
+            return Ok(new {Success = true, Message = "The order has been finalized."});
         }
     }
 }

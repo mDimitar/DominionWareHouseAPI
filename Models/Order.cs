@@ -18,7 +18,7 @@ namespace DominionWarehouseAPI.Models
 
         public string Comment { get; set; }
 
-        public OrderStatus OrderStatus { get; set; } = OrderStatus.Pending;
+        public OrderStatus OrderStatus { get; set; } = OrderStatus.Processing;
 
         [ForeignKey("ShoppingCart")]
         public int ShoppingCartId { get; set; }
@@ -28,6 +28,6 @@ namespace DominionWarehouseAPI.Models
 
         public int? soldFromEmployeeId { get; set; }
 
-        public DateTime DateCreated { get; set; } = DateTime.UtcNow;
+        public DateTime DateCreated { get; set; } = DateTime.Now;
     }
 }
