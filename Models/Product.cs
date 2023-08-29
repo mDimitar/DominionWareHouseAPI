@@ -30,7 +30,9 @@ namespace DominionWarehouseAPI.Models
 
         public string ProductImageURL { get; set; }
 
-        public int ProductPrice { get; set; } 
+        public int ProductPrice { get; set; }
+
+        public int ProductPriceForSelling { get; set; }
 
     }
 }

@@ -62,19 +62,46 @@ namespace DominionWarehouseAPI.Controllers
                 TotalSum = user.ShoppingCart.TotalPrice,
                 ShoppingCartId = user.ShoppingCart.Id,
                 soldFromWarehouseId = request.soldFromWarehouseId,
-                soldFromEmployeeId = null
+                soldFromEmployeeId = null //later to be assigned when finalizing order
             };
 
             dbContext.Orders.Add(neworder);
             dbContext.SaveChanges();
 
-            var rectToDelete = dbContext.ProductsInShoppingCarts.Where(sc => sc.ShoppingCartId == user.ShoppingCartId).ToList();
-
-            dbContext.ProductsInShoppingCarts.RemoveRange(rectToDelete);
-            dbContext.SaveChanges();
-
 
             return Ok("success write");
+        }
+
+        [HttpPut("FinalizeOrder/{id}")]
+        public async Task<IActionResult> FinalizeOrder(int id)
+        {
+
+            var order = dbContext.Orders.SingleOrDefault(o => o.Id == id);
+
+            if(order == null)
+            {
+                return BadRequest("Order not found");
+            }
+
+            var shoppingCartId = order.ShoppingCartId;
+
+            var prodsInSc = dbContext.ProductsInShoppingCarts.Include(p => p.Product).
+                Where(psc => psc.ShoppingCartId == shoppingCartId).ToList();
+
+           
+
+            foreach(var prod in prodsInSc)
+            {
+
+            }
+
+            return null;
+
+
+            /*var rectToDelete = dbContext.ProductsInShoppingCarts.Where(sc => sc.ShoppingCartId == user.ShoppingCartId).ToList();
+
+            dbContext.ProductsInShoppingCarts.RemoveRange(rectToDelete);
+            dbContext.SaveChanges();*/
         }
     }
 }

@@ -67,6 +67,7 @@ namespace DominionWarehouseAPI.Controllers
                 }
 
                 var product = await dbContext.Products.FindAsync(productDTO.ProductId);
+
                 if (product == null)
                 {
                     return NotFound("Product not found.");
@@ -84,42 +85,27 @@ namespace DominionWarehouseAPI.Controllers
                 var existingProduct = shoppingCart.ProductShoppingCarts
                     .FirstOrDefault(psc => psc.ProductId == productDTO.ProductId);
 
-
-
                 if (existingProduct != null)
                 {
-                    
-                    if(existingProduct.Quantity > productDTO.Quantity)
-                    {
-                        existingProduct.Quantity = productDTO.Quantity;
-                        var fetchprod = dbContext.Products.FirstOrDefault(p => p.Id == existingProduct.ProductId);
-                        shoppingCart.TotalPrice = fetchprod.ProductPrice * productDTO.Quantity;
-                        await dbContext.SaveChangesAsync();
-                    }
-                    else
-                    {
-                        existingProduct.Quantity += productDTO.Quantity;
-                        var prod = dbContext.Products.FirstOrDefault(p => p.Id == existingProduct.ProductId);
-                        shoppingCart.TotalPrice = prod.ProductPrice * productDTO.Quantity;
-                    }
+                    shoppingCart.TotalPrice = shoppingCart.TotalPrice - 
+                        (existingProduct.Quantity * product.ProductPriceForSelling) +
+                        (productDTO.Quantity * product.ProductPriceForSelling);
+
+                    existingProduct.Quantity = productDTO.Quantity;
                 }
                 else
                 {
-                    
-                    var productInCart = new ProductsInShoppingCart
+                    var productToBeAdded = new ProductsInShoppingCart
                     {
                         ProductId = productDTO.ProductId,
-                        Quantity = productDTO.Quantity
+                        ShoppingCartId = shoppingCart.Id,
+                        Quantity = productDTO.Quantity,
                     };
-                    shoppingCart.ProductShoppingCarts.Add(productInCart);
                     
-                    var addedProduct = dbContext.Products.FirstOrDefault(p => p.Id == productDTO.ProductId);
+                    shoppingCart.ProductShoppingCarts.Add(productToBeAdded);
 
-                    shoppingCart.TotalPrice = addedProduct.ProductPrice * productDTO.Quantity;
-
-
+                    shoppingCart.TotalPrice += productToBeAdded.Quantity * product.ProductPriceForSelling;
                 }
-
 
                 await dbContext.SaveChangesAsync();
 

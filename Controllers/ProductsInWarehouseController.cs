@@ -49,7 +49,6 @@ namespace DominionWarehouseAPI.Controllers
                     ProductId = request.ProductId,
                     Quantity = request.Quantity,
                     Received = username,
-                    ProductPriceForSelling = request.ProductPriceForSelling
                 };
                 dbContext.ProductsInWarehouses.Add(prodInWarehouse);
                 dbContext.SaveChanges();
@@ -76,7 +75,6 @@ namespace DominionWarehouseAPI.Controllers
             }
 
             prodToBeEdited.Quantity = request.Quantity;
-            prodToBeEdited.ProductPriceForSelling = request.ProductPriceForSelling;
             prodToBeEdited.Product.ProductName = request.ProductName;
             prodToBeEdited.Product.ProductImageURL = request.ProductImageUrl;
             prodToBeEdited.Product.ProductName = request.ProductName;

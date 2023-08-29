@@ -7,6 +7,6 @@
         public int CategoryId { get; set; }
         public int ProductPrice { get; set; }
         public string ImageURL { get; set; }
-
+        public int ProductPriceForSelling { get; set; }
     }
 }
