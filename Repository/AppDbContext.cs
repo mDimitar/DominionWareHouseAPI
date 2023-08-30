@@ -24,6 +24,8 @@ namespace DominionWarehouseAPI.Database
         public DbSet<Order> Orders { get; set; }
         public DbSet<ProductsInWarehouse> ProductsInWarehouses { get; set; }
 
+        public DbSet<OrderProduct> ProductsInOrder { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Configure User entity to map to a specific table (if required)
@@ -105,7 +107,19 @@ namespace DominionWarehouseAPI.Database
                     .HasConversion<string>();
             });
 
+            //productsinorder
+            modelBuilder.Entity<OrderProduct>()
+                .HasKey(op => new { op.OrderId, op.ProductId });
 
+            modelBuilder.Entity<OrderProduct>()
+                .HasOne(op => op.Order)
+                .WithMany(o => o.OrderProducts)
+                .HasForeignKey(op => op.OrderId);
+
+            modelBuilder.Entity<OrderProduct>()
+                .HasOne(op => op.Product)
+                .WithMany(p => p.OrderProducts)
+                .HasForeignKey(op => op.ProductId);
         }
         public override int SaveChanges()
         {

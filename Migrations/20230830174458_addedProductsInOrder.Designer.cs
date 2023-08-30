@@ -4,6 +4,7 @@ using DominionWarehouseAPI.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DominionWarehouseAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230830174458_addedProductsInOrder")]
+    partial class addedProductsInOrder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -97,7 +100,7 @@ namespace DominionWarehouseAPI.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductsInOrder");
+                    b.ToTable("OrderProduct");
                 });
 
             modelBuilder.Entity("DominionWarehouseAPI.Models.Product", b =>

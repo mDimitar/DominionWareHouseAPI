@@ -34,5 +34,7 @@ namespace DominionWarehouseAPI.Models
 
         public int ProductPriceForSelling { get; set; }
 
+        public ICollection<OrderProduct> OrderProducts { get; set; }
+
     }
 }

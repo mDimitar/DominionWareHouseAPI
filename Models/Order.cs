@@ -29,5 +29,7 @@ namespace DominionWarehouseAPI.Models
         public int? soldFromEmployeeId { get; set; }
 
         public DateTime DateCreated { get; set; } = DateTime.Now;
+
+        public ICollection<OrderProduct> OrderProducts { get; set; } //this added
     }
 }

@@ -6,8 +6,8 @@ namespace DominionWarehouseAPI.Models.Enums
     {
         [Display(Name = "Processing")]
         Processing,
-        [Display(Name = "Shipped")]
-        Shipped,
+        [Display(Name = "Delivered")]
+        Delivered,
         [Display(Name = "Canceled")]
         Canceled
     }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 
 namespace DominionWarehouseAPI.Controllers
@@ -27,6 +28,11 @@ namespace DominionWarehouseAPI.Controllers
         public IActionResult GetAllProductsFromWarehouse(int id)
         {
             var prodsinwh = dbContext.ProductsInWarehouses.Include(piw => piw.Product).Where(p => p.WarehouseId == id).ToList();
+
+            if(prodsinwh.IsNullOrEmpty())
+            {
+                return BadRequest(new { Success = false, Message = "There are no products in the warehouse at the moment" });
+            }
 
             return Ok(prodsinwh);
         }
