@@ -26,6 +26,7 @@ namespace DominionWarehouseAPI.Controllers
 
 
         [HttpGet("GetAllOrders")]
+        [Authorize(Roles = "EMPLOYEE,OWNER")]
         public IActionResult GetAllOrders()
         {
             var orders = dbContext.Orders

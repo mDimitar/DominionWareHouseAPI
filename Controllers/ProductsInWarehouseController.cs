@@ -23,6 +23,29 @@ namespace DominionWarehouseAPI.Controllers
             _configuration = configuration;
         }
 
+
+        [HttpGet("FilterProductsFromWarehouse/{id}")]
+        public async Task<IActionResult> GetProductsInWarehouse(string searchQuery) //api/warehouse/products?searchQuery=${searchQuery}
+        {
+            var query = dbContext.ProductsInWarehouses
+                .Include(wp => wp.Product)
+                .Where(wp => wp.Product.ProductName.Contains(searchQuery) ||
+                             wp.Product.ProductDescription.Contains(searchQuery))
+                .Select(wp => new
+                {
+                    wp.Product.Id,
+                    wp.Product.ProductName,
+                    wp.Product.ProductDescription,
+                    wp.Product.Category.CategoryName,
+                    wp.Product.ProductPriceForSelling,
+                    wp.Product.ProductImageURL,
+                });
+
+            var products = await query.ToListAsync();
+
+            return Ok(products);
+        }
+
         [HttpGet("GetProductsFromWarehouse/{id}")]
         [Authorize(Roles = "ADMIN,OWNER,EMPLOYEE,BUYER")]
         public IActionResult GetAllProductsFromWarehouse(int id)
