@@ -31,5 +31,9 @@ namespace DominionWarehouseAPI.Models
         public DateTime DateCreated { get; set; } = DateTime.Now;
 
         public ICollection<OrderProduct> OrderProducts { get; set; } //this added
+
+        public string PhoneNumber { get; set; }
+
+        public string CommentFromEmployee { get; set; }
     }
 }

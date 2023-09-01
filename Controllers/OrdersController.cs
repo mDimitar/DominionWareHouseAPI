@@ -78,6 +78,7 @@ namespace DominionWarehouseAPI.Controllers
                 OrderStatus = OrderStatus.Processing,
                 ShoppingCartId = user.ShoppingCart.Id,
                 soldFromWarehouseId = request.soldFromWarehouseId,
+                PhoneNumber = request.PhoneNumber,
                 soldFromEmployeeId = null //later to be assigned when finalizing order
             };
 
@@ -114,6 +115,26 @@ namespace DominionWarehouseAPI.Controllers
             dbContext.SaveChanges();
 
             return Ok(new { Success = true, Message = "The order has been created succesfully." });
+        }
+
+        [HttpPut("EditOrder/{id}")]
+        [Authorize(Roles = "BUYER")]
+        public async Task<IActionResult> EditOrder(int id, OrderEditDTO request)
+        {
+            var order = dbContext.Orders.FirstOrDefault(o => o.Id == id);
+
+            if(order == null)
+            {
+                return BadRequest("The requested order cannot be found");
+            }
+
+            order.PhoneNumber = request.PhoneNumber;
+            order.Comment = request.Comment;
+
+            dbContext.SaveChanges();
+
+            return Ok(new { Success = true, Message = "The changes have been succesfully registered." });
+
         }
 
         [HttpPut("FinalizeOrder/{id}")]
@@ -156,11 +177,22 @@ namespace DominionWarehouseAPI.Controllers
         [Authorize(Roles = "BUYER,EMPLOYEE")]
         public async Task<IActionResult> CancelOrder(int id)
         {
+
+            string username = User.FindFirstValue(ClaimTypes.Name);
+
+            var user = dbContext.Users.Include(u => u.Role).FirstOrDefault(u => u.Username == username);
+
             var order = dbContext.Orders.FirstOrDefault(o => o.Id == id);
 
             if(order == null)
             {
                 return BadRequest(new { Success = false, Message = "Order not found" });
+            }
+
+            if (user.Role.RoleName.Equals("EMPLOYEE"))
+            {
+                order.OrderStatus = OrderStatus.Canceled;
+                order.CommentFromEmployee = "The order has been canceled by an employee. Please contact us for more info.";
             }
 
             order.OrderStatus = OrderStatus.Canceled;
