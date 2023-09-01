@@ -12,7 +12,7 @@ namespace DominionWarehouseAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "BUYER")]
+
     public class OrdersController : ControllerBase
     {
         private readonly AppDbContext dbContext;
@@ -58,6 +58,7 @@ namespace DominionWarehouseAPI.Controllers
         }
 
         [HttpPost("CreateOrder")]
+        [Authorize(Roles = "BUYER")]
         public IActionResult CreateOrder(OrderDTO request)
         {
             string username = User.FindFirstValue(ClaimTypes.Name);
@@ -116,7 +117,7 @@ namespace DominionWarehouseAPI.Controllers
         }
 
         [HttpPut("FinalizeOrder/{id}")]
-        //[Authorize(Roles = "EMPLOYEE")]
+        [Authorize(Roles = "EMPLOYEE")]
         public async Task<IActionResult> FinalizeOrder(int id)
         {
             string username = User.FindFirstValue(ClaimTypes.Name);
@@ -152,7 +153,7 @@ namespace DominionWarehouseAPI.Controllers
         }
 
         [HttpPut("CancelOrder/{id}")]
-
+        [Authorize(Roles = "BUYER,EMPLOYEE")]
         public async Task<IActionResult> CancelOrder(int id)
         {
             var order = dbContext.Orders.FirstOrDefault(o => o.Id == id);

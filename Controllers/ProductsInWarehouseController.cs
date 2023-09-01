@@ -24,7 +24,7 @@ namespace DominionWarehouseAPI.Controllers
         }
 
         [HttpGet("FilterProductsFromWarehouseByCategory/{id}")]
-        public async Task<IActionResult> FilterProductsByIncomingCategory(int id) //api/warehouse/products?searchQuery=${searchQuery}
+        public async Task<IActionResult> FilterProductsByIncomingCategory(int id)
         {
             var query = dbContext.ProductsInWarehouses
                 .Include(wp => wp.Product)
