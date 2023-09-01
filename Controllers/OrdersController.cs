@@ -49,12 +49,7 @@ namespace DominionWarehouseAPI.Controllers
 
             if (orders.IsNullOrEmpty())
             {
-                var failedResponse = new
-                {
-                    Success = false,
-                    Message = "No orders found in the database."
-                };
-                return BadRequest(failedResponse);
+                return BadRequest(new {Success = false , Message = "No orders found in the database." });
             }
 
             return Ok(orders);
@@ -62,7 +57,7 @@ namespace DominionWarehouseAPI.Controllers
 
 
         [HttpGet("GetAllOrders")]
-        [Authorize(Roles = "EMPLOYEE,OWNER")]
+        [Authorize(Roles = "ADMIN,EMPLOYEE,OWNER")]
         public IActionResult GetAllOrders()
         {
             var orders = dbContext.Orders
@@ -82,12 +77,7 @@ namespace DominionWarehouseAPI.Controllers
 
             if (orders.IsNullOrEmpty())
             {
-                var failedResponse = new
-                {
-                    Success = false,
-                    Message = "No orders found in the database."
-                };
-                return BadRequest(failedResponse);
+                return BadRequest(new { Success = false, Message = "No orders found in the database." });
             }
 
             return Ok(orders);
@@ -100,11 +90,6 @@ namespace DominionWarehouseAPI.Controllers
             string username = User.FindFirstValue(ClaimTypes.Name);
 
             var user = dbContext.Users.Include(u => u.ShoppingCart).FirstOrDefault(u => u.Username == username);
-
-            if (user == null)
-            {
-                return BadRequest("You must be authorized");
-            }
 
             var neworder = new Order
             {
@@ -161,12 +146,12 @@ namespace DominionWarehouseAPI.Controllers
 
             if(order == null)
             {
-                return BadRequest("The requested order cannot be found");
+                return BadRequest(new {Success = false ,Message = "The requested order cannot be found"});
             }
 
             if (!order.OrderStatus.Equals("Processing"))
             {
-                return BadRequest("The order has been finished and cannot accept editing.");
+                return BadRequest(new {Success = false, Message = "The order have been closed and cannot accept editing." });
             }
 
             order.PhoneNumber = request.PhoneNumber;

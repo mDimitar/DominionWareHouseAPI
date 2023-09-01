@@ -30,12 +30,7 @@ namespace DominionWarehouseAPI.Controllers
 
             if (products.IsNullOrEmpty())
             {
-                var failedResponse = new
-                {
-                    Success = false,
-                    Message = "No products can be found in the database.",
-                };
-                return new JsonResult(failedResponse);
+                return BadRequest(new {Success = false, Message = "No products can be found in the database." });
             }
 
             return Ok(products);
@@ -48,12 +43,7 @@ namespace DominionWarehouseAPI.Controllers
 
             if (product)
             {
-                var failedResponse = new
-                {
-                    Success = false,
-                    Message = "The product already exists. Please enter a new name.",
-                };
-                return new JsonResult(failedResponse);
+                return BadRequest(new { Success = false, Message = "The product already exists. Please enter a new name." });
             }
 
             var newProduct = new Product
@@ -69,13 +59,7 @@ namespace DominionWarehouseAPI.Controllers
             dbContext.Products.Add(newProduct);
             dbContext.SaveChanges();
 
-            var successfullResponse = new
-            {
-                Success = true,
-                Message = "The product has been successfully registered.",
-            };
-
-            return new JsonResult(successfullResponse);
+            return Ok(new { Success = true, Message = "The product has been successfully registered." });
         }
 
 
@@ -86,12 +70,7 @@ namespace DominionWarehouseAPI.Controllers
 
             if (!product)
             {
-                var failedResponse = new
-                {
-                    Success = false,
-                    Message = "The product does not exists",
-                };
-                return new JsonResult(failedResponse);
+                return BadRequest(new { Success = false, Message = "The product does not exists" });
             }
 
             var productToBeEdited = dbContext.Products.SingleOrDefault(p => p.Id == id);
@@ -104,13 +83,7 @@ namespace DominionWarehouseAPI.Controllers
 
             dbContext.SaveChanges();
 
-            var successEditResponse = new
-            {
-                Success = true,
-                Message = "The changes has been successfully registered.",
-            };
-
-            return new JsonResult(successEditResponse);
+            return Ok(new { Success = true, Message = "The changes has been successfully registered." });
         }
 
         [HttpDelete("DeleteProduct/{id}")]
@@ -120,24 +93,13 @@ namespace DominionWarehouseAPI.Controllers
 
             if (product == null)
             {
-                var failedResponse = new
-                {
-                    Success = false,
-                    Message = "The product you are trying to delete does not exist."
-                };
-                return new JsonResult(failedResponse);
+                return BadRequest(new { Success = false, Message = "The product you are trying to delete does not exist." });
             }
 
             dbContext.Products.Remove(product);
             dbContext.SaveChanges();
 
-            var successEditResponse = new
-            {
-                Success = true,
-                Message = "The product has been successfully deleted.",
-            };
-
-            return new JsonResult(successEditResponse);
+            return Ok(new { Success = true, Message = "The product has been successfully deleted." });
         }
     }
 }

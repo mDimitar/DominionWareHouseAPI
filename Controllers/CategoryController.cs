@@ -31,12 +31,7 @@ namespace DominionWarehouseAPI.Controllers
 
             if (categories.IsNullOrEmpty())
             {
-                var failResponse = new 
-                {
-                    Success = false,
-                    Message = "There are no existing categories in the database."
-                };
-                return new JsonResult(failResponse);
+                return BadRequest(new {Success = false, Message = "There are no existing categories in the database." });
             }
             return Ok(categories);
         }
@@ -50,12 +45,7 @@ namespace DominionWarehouseAPI.Controllers
 
             if (category != null)
             {
-                var failResponse = new
-                {
-                    Success = false,
-                    Message = "The category already exists."
-                };
-                return new JsonResult(failResponse);
+                return BadRequest(new { Success = false, Message = "The category already exists." });
             }
 
             var newCategory = new Category
@@ -66,12 +56,7 @@ namespace DominionWarehouseAPI.Controllers
             dbContext.Categories.Add(newCategory);
             dbContext.SaveChanges();
 
-            var successResponse = new
-            {
-                Success = true,
-                Message = "The category has been registered successfully."
-            };
-            return new JsonResult(successResponse);
+            return Ok(new { Success = true, Message = "The category has been registered successfully." });
         }
 
         [HttpPut("EditCategory/{id}")]
@@ -81,24 +66,14 @@ namespace DominionWarehouseAPI.Controllers
 
             if (category == null)
             {
-                var failResponse = new
-                {
-                    Success = false,
-                    Message = "There requested category cannot be found"
-                };
-                return new JsonResult(failResponse);
+                return BadRequest(new { Success = false, Message = "There requested category cannot be found." });
             }
 
             category.CategoryName = request.CategoryName;
 
             dbContext.SaveChanges();
 
-            var successResponse = new
-            {
-                Success = true,
-                Message = "The changes has been registered successfully."
-            };
-            return new JsonResult(successResponse);
+            return Ok(new { Success = true, Message = "The changes have been registered successfully." });
         }
 
         [HttpDelete("DeleteCategory/{id}")]
@@ -108,23 +83,13 @@ namespace DominionWarehouseAPI.Controllers
 
             if (category == null)
             {
-                var failResponse = new
-                {
-                    Success = false,
-                    Message = "There requested category cannot be found"
-                };
-                return new JsonResult(failResponse);
+                return BadRequest(new { Success = false, Message = "There requested category cannot be found." });
             }
 
             dbContext.Categories.Remove(category);
             dbContext.SaveChanges();
 
-            var successResponse = new
-            {
-                Success = true,
-                Message = "The category has been deleted successfully."
-            };
-            return new JsonResult(successResponse);
+            return Ok(new { Success = true, Message = "The category has been deleted successfully." });
         }
     }
 }

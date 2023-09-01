@@ -107,7 +107,7 @@ namespace DominionWarehouseAPI.Controllers
                 prodToBeAdded.Quantity += request.Quantity;
                 dbContext.SaveChanges();
             }
-            return Ok("success");
+            return Ok(new {Success =  true, Message = "The product has been successfully added to the warehouse."});
         }
 
         [HttpPost("EditProductInWarehouse/")]
@@ -120,7 +120,7 @@ namespace DominionWarehouseAPI.Controllers
 
             if (prodToBeEdited == null)
             {
-                return BadRequest("Product Not Found");
+                return BadRequest(new { Success = false, Message = "The product does not exist in the warehouse." });
             }
 
             prodToBeEdited.Quantity = request.Quantity;
@@ -131,7 +131,7 @@ namespace DominionWarehouseAPI.Controllers
 
             dbContext.SaveChanges();
 
-            return Ok("success");
+            return Ok(new { Success = true, Message = "The changes have been successfully registered" });
         }
 
     }

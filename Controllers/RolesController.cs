@@ -30,12 +30,7 @@ namespace DominionWarehouseAPI.Controllers
 
             if(roles.IsNullOrEmpty())
             {
-                var failedResponse = new
-                {
-                    Success = false,
-                    Message = "No roles can be found in the database.",
-                };
-                return new JsonResult(failedResponse);
+                return BadRequest(new {Success = false, Message = "No roles can be found in the database." });
             }
 
             return Ok(roles);
@@ -49,12 +44,7 @@ namespace DominionWarehouseAPI.Controllers
 
             if(existingRole)
             {
-                var failedResponse = new
-                {
-                    Success = false,
-                    Message = "The role already exists."
-                };
-                return new JsonResult(failedResponse);
+                return BadRequest(new { Success = false, Message = "The role already exists." });
             }
 
             var newRole = new Roles
@@ -65,13 +55,7 @@ namespace DominionWarehouseAPI.Controllers
             dbContext.Roles.Add(newRole);
             dbContext.SaveChanges();
 
-            var successResponse = new
-            {
-                Success = true,
-                Message = "Role has been added successfully"
-            };
-
-            return Ok(successResponse);
+            return Ok(new { Success = true, Message = "The role has been added successfully." });
         }
 
     }

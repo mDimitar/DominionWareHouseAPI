@@ -11,7 +11,7 @@ namespace DominionWarehouseAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "OWNER,ADMIN")]
+
     public class WarehouseController : ControllerBase
     {
         private readonly AppDbContext dbContext;
@@ -24,6 +24,7 @@ namespace DominionWarehouseAPI.Controllers
         }
 
         [HttpGet("Warehouses")]
+        [Authorize(Roles = "OWNER,ADMIN")]
         public async Task<ActionResult<Warehouse>> GetAllWarehouses()
         {
 
@@ -31,18 +32,13 @@ namespace DominionWarehouseAPI.Controllers
 
             var user = dbContext.Users.FirstOrDefault(u => u.Username == username);
 
-            if (user.RoleId == 1)
+            if (user.Role.RoleName.Equals("ADMIN"))
             {
                 var allWarehouses = dbContext.Warehouse.Include(u => u.User).Include(pr => pr.WarehouseProducts).ToList();
 
                 if (allWarehouses.IsNullOrEmpty())
                 {
-                    var failedResponse = new
-                    {
-                        Success = false,
-                        Message = "No warehouses found in the database."
-                    };
-                    return new JsonResult(failedResponse);
+                    return BadRequest(new {Success = false, Message = "No warehouses found in the database"});
                 }
                     
                 return Ok(dbContext.Warehouse.Include(u => u.User).ToList());
@@ -52,30 +48,28 @@ namespace DominionWarehouseAPI.Controllers
 
             if (warehouses.IsNullOrEmpty())
             {
-                var failPullResponse = new
-                {
-                    Success = false,
-                    Message = "There are no existing warehouse records in the database.",
-                };
-                return new JsonResult(failPullResponse);
+                return BadRequest(new {Success = false, Message = "There are no existing warehouse records in the database." });
             }
 
             return Ok(warehouses);
         }
 
         [HttpPost("RegisterWarehouse")]
+        [Authorize(Roles = "OWNER,ADMIN")]
         public ActionResult<Warehouse> RegisterWarehouse(WarehouseDTO warehouse)
         {
+            var warehouses = dbContext.Warehouse.ToList();
+
+            if(warehouses.Count > 1)
+            {
+                return BadRequest(new { Success = false, Message = "You have already registered a warehouse." });
+            }
+
             var warehouseExists = dbContext.Warehouse.Any(w => w.Name == warehouse.Name);
 
             if (warehouseExists)
             {
-                var failedResponse = new
-                {
-                    Success = false,
-                    Message = "The warehouse already exists. Please enter a new name.",
-                };
-                return new JsonResult(failedResponse);
+                return BadRequest(new { Success = false, Message = "The warehouse already exists. Please enter a new name." });
             }
 
             // Check if the user is authenticated and get their UserId
@@ -99,42 +93,23 @@ namespace DominionWarehouseAPI.Controllers
                 user.WorksAtWarehouse = newWarehouse.Id;
                 dbContext.SaveChanges();
 
-                var successfullResponse = new
-                {
-                    Success = true,
-                    Message = "The warehouse has been successfully registered.",
-                };
-
-                return new JsonResult(successfullResponse);
+                return Ok(new {Success = true, Message = "The warehouse has been successfully registered." });
             }
             else
             {
-                // Handle the case when the user is not authenticated
-                var unauthorizedResponse = new
-                {
-                    Success = false,
-                    Message = "You must be logged in to register a warehouse.",
-                };
-
-                return new JsonResult(unauthorizedResponse);
+                return BadRequest(new {Success = false, Message = "You must be logged in to register a warehouse." });
             }
         }
 
-        //edit option
-
         [HttpPut("EditWarehouse/{id}")]
+        [Authorize(Roles = "OWNER,ADMIN")]
         public IActionResult EditWarehouse(int id, [FromBody] WarehouseDTO updatedWarehouseDTO)
         {
             var existingWarehouse = dbContext.Warehouse.Include(w => w.User).FirstOrDefault(w => w.Id == id);
 
             if (existingWarehouse == null)
             {
-                var failEditResponse = new
-                {
-                    Success = false,
-                    Message = "The warehouse you are trying to edit cannot be found.",
-                };
-                return new JsonResult(failEditResponse);
+                return BadRequest(new {Success = false, Message = "The warehouse you are trying to edit cannot be found." });
             }
 
             existingWarehouse.Name = updatedWarehouseDTO.Name;
@@ -142,41 +117,25 @@ namespace DominionWarehouseAPI.Controllers
 
             dbContext.SaveChanges();
 
-            var successEditResponse = new
-            {
-                Success = true,
-                Message = "The changes has been successfully registered.",
-            };
-
-            return new JsonResult(successEditResponse);
+            return Ok(new {Success = true, Message = "The changes has been successfully registered." });
         }
 
         [HttpDelete("DeleteWarehouse/{id}")]
+        [Authorize(Roles = "OWNER,ADMIN")]
         public IActionResult DeleteWarehouse(int id)
         {
             var warehouse = dbContext.Warehouse.FirstOrDefault(w => w.Id == id);
             
             if(warehouse == null)
             {
-                var failDeleteResponse = new
-                {
-                    Success = false,
-                    Message = "The warehouse you are trying to delete cannot be found.",
-                };
-                return new JsonResult(failDeleteResponse);
+                return BadRequest(new {Success = false, Message = "The warehouse you are trying to delete cannot be found." });
             }
 
             dbContext.Remove(warehouse);
 
             dbContext.SaveChanges();
 
-            var successDeleteResponse = new
-            {
-                Success = true,
-                Message = "The changes has been successfully deleted.",
-            };
-
-            return new JsonResult(successDeleteResponse);
+            return Ok(new {Success = true, Message = "The changes has been successfully deleted." });
         }
 
     }

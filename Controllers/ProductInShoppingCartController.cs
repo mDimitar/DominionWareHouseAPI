@@ -44,22 +44,18 @@ namespace DominionWarehouseAPI.Controllers
                             Quantity = psc.Quantity
                         };
 
-            var returnAnswer = new
+            var response = new
             {
                 Products = query,
                 TotalPrice = user.ShoppingCart.TotalPrice
             };
 
-            if (returnAnswer.Products.IsNullOrEmpty())
+            if (response.Products.IsNullOrEmpty())
             {
-                return new JsonResult(new
-                {
-                    Success = false,
-                    Message = "No products has been found in your shopping cart."
-                });
+                return BadRequest(new { Success = false, Message = "No products have been found in your shopping cart." });
             }
 
-            return Ok(returnAnswer);
+            return Ok(response);
         }
 
         [HttpPost("AddProductToShoppingCart")]
@@ -76,7 +72,7 @@ namespace DominionWarehouseAPI.Controllers
 
                 if (product == null)
                 {
-                    return NotFound("Product not found.");
+                    return BadRequest(new { Success = false, Message = "The requested product cannot be found" });
                 }
 
                 string username = User.FindFirstValue(ClaimTypes.Name);
@@ -115,13 +111,7 @@ namespace DominionWarehouseAPI.Controllers
 
                 await dbContext.SaveChangesAsync();
 
-                var successResponse = new
-                {
-                    Success = true,
-                    Message = "Product has been added successfully to the shopping cart."
-                };
-
-                return new JsonResult(successResponse);
+                return Ok(new {Success = true, Message = "Product has been added successfully to the shopping cart." });
             }
             catch (Exception ex)
             {
@@ -138,7 +128,7 @@ namespace DominionWarehouseAPI.Controllers
 
             if (user == null)
             {
-                return BadRequest("User cannot be found");
+                return BadRequest(new { Success = false, Message = "The user cannot be found." });
             }
 
             var userProdsInSc = await dbContext.ProductsInShoppingCarts.
@@ -148,7 +138,7 @@ namespace DominionWarehouseAPI.Controllers
             dbContext.ProductsInShoppingCarts.Remove(userProdsInSc);
             dbContext.SaveChanges();
 
-            return Ok("Success");
+            return Ok(new { Success = true, Message = "Product has been deleted successfully from the shopping cart." });
         }
     }
 }

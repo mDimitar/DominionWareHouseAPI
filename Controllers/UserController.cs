@@ -1,9 +1,7 @@
-﻿using Azure.Core;
-using DominionWarehouseAPI.Database;
+﻿using DominionWarehouseAPI.Database;
 using DominionWarehouseAPI.Models;
 using DominionWarehouseAPI.Models.Data_Transfer_Objects;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -38,17 +36,11 @@ namespace DominionWarehouseAPI.Controllers
                 user.Username,
                 user.WorksAtWarehouse,
                 RoleName = user.Role.RoleName
-            })
-            .ToList(); ;
+            }).ToList();
 
-            if(users.IsNullOrEmpty())
+            if (users.IsNullOrEmpty())
             {
-                var failResponse = new
-                {
-                    Success = false,
-                    Message = "There are no users currently in the database"
-                };
-                return BadRequest(failResponse);
+                return BadRequest(new { Success = false, Message = "There are no users currently in the database" });
             }
             return Ok(users);
         }
@@ -61,14 +53,7 @@ namespace DominionWarehouseAPI.Controllers
 
             if (userExists)
             {
-
-                var failedResponse = new
-                {
-                    Success = false,
-                    Message = "The user already exists.Please enter a new username.",
-                };
-
-                return new JsonResult(failedResponse);
+                return BadRequest(new { Success = false, Message = "The user already exists.Please enter a new username." });
             }
 
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
@@ -84,13 +69,7 @@ namespace DominionWarehouseAPI.Controllers
             dbContext.Users.Add(newUser);
             dbContext.SaveChanges();
 
-            var successfullResponse = new
-            {
-                Success = true,
-                Message = "The user has been successfully registered.",
-            };
-
-            return new JsonResult(successfullResponse);
+            return Ok(new { Success = true, Message = "The user has been successfully registered." });
         }
 
         [HttpPost("Login")]
@@ -100,85 +79,20 @@ namespace DominionWarehouseAPI.Controllers
 
             if (!userExists)
             {
-                var failResponse = new
-                {
-                    Success = false,
-                    Message = "The requested user cannot be found.",
-                };
-                return new JsonResult(failResponse);
+                return BadRequest(new { Success = false, Message = "The requested user cannot be found." });
             }
 
             var user = dbContext.Users.Include(u => u.Role).FirstOrDefault(user => user.Username == request.Username);
 
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             {
-                var failResponse = new
-                {
-                    Success = false,
-                    Message = "Wrong password."
-                };
-                return new JsonResult(failResponse);
+                return BadRequest(new { Success = false, Message = "Wrong Password" });
             }
 
             string token = CreateToken(user);
 
-            var successResponse = new
-            {
-                Success = true,
-                Message = "Token successfully generated.",
-                Token = token
-            };
-
-            return new JsonResult(successResponse);
+            return Ok(new { Success = true, Message = "Token successfully generated", Token = token });
         }
-
-
-        //validation starts here
-
-        /*[HttpPost]
-        [Route("VerifyToken")]
-        public IActionResult VerifyToken([FromBody] string token)
-        {
-            try
-            {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value!));
-
-                var validationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = key,
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ClockSkew = TimeSpan.Zero
-                };
-
-
-                SecurityToken validatedToken;
-                var principal = tokenHandler.ValidateToken(token, validationParameters, out validatedToken);
-
-                var successResponse = new CustomizedResponse
-                {
-                    Success = true,
-                    Message = "The requested token is valid.",
-                };
-
-                return new JsonResult(successResponse);
-            }
-            catch (Exception)
-            {
-                var failResponse = new CustomizedResponse
-                {
-                    Success = false,
-                    Message = "The requested token is not valid.",
-                };
-
-                return new JsonResult(failResponse);
-            }
-        }*/
-
-        //and ends here
-
 
         private string CreateToken(User user)
         {
@@ -194,7 +108,7 @@ namespace DominionWarehouseAPI.Controllers
 
             var token = new JwtSecurityToken(
                     claims: claims,
-                    expires: DateTime.Now.AddDays(1),
+                    expires: DateTime.Now.AddHours(8),
                     signingCredentials: credentials
                 );
 
@@ -220,13 +134,7 @@ namespace DominionWarehouseAPI.Controllers
 
             dbContext.SaveChanges();
 
-            var successResponse = new
-            {
-                Success = true,
-                Message = "The user data has been successfully updated.",
-            };
-
-            return new JsonResult(successResponse);
+            return Ok(new { Success = true, Message = "The user data has been successfully updated." });
         }
 
         [HttpDelete("DeleteUser/{id}")]
@@ -235,19 +143,17 @@ namespace DominionWarehouseAPI.Controllers
         {
             var user = dbContext.Users.FirstOrDefault(u => u.Id == id);
 
+            if (user == null)
+            {
+                return BadRequest(new { Success = false, Message = "The user cannot be found" });
+            }
+
             dbContext.Remove(user);
 
             dbContext.SaveChanges();
 
-            var successResponse = new
-            {
-                Success = true,
-                Message = "The user has been successfully deleted.",
-            };
-
-            return new JsonResult(successResponse);
+            return Ok(new { Success = true, Message = "The user has beed successfully deleted" });
         }
-
 
     }
 
