@@ -15,12 +15,12 @@ namespace DominionWarehouseAPI.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(Roles = "ADMIN,OWNER")]
-    public class AdminController : ControllerBase
+    public class AdminPanelController : ControllerBase
     {
         private readonly AppDbContext dbContext;
         private readonly IConfiguration _configuration;
 
-        public AdminController(AppDbContext context, IConfiguration configuration)
+        public AdminPanelController(AppDbContext context, IConfiguration configuration)
         {
             this.dbContext = context;
             _configuration = configuration;
