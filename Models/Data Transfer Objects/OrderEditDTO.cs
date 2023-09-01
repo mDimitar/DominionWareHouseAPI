@@ -3,7 +3,6 @@
     public class OrderEditDTO
     {
         public string Comment { get; set; }
-
         public string PhoneNumber { get; set; }
     }
 }

@@ -24,6 +24,42 @@ namespace DominionWarehouseAPI.Controllers
             _configuration = configuration;
         }
 
+        [HttpGet("GetAllOrdersForBuyer")]
+        [Authorize(Roles = "BUYER")]
+        public IActionResult GetAllOrdersForBuyer()
+        {
+            string username = User.FindFirstValue(ClaimTypes.Name);
+
+            var user = dbContext.Users.FirstOrDefault(u => u.Username == username);
+
+            var orders = dbContext.Orders
+                .Select(order => new
+                {
+                    Id = order.Id,
+                    UserId = order.UserId,
+                    TotalSum = order.TotalSum,
+                    Comment = order.Comment,
+                    OrderStatus = order.OrderStatus,
+                    ShoppingCartId = order.ShoppingCartId,
+                    soldFromWarehouseId = order.soldFromWarehouseId,
+                    soldFromEmployeeId = order.soldFromEmployeeId,
+                    DateCreated = order.DateCreated
+                })
+                .Where(o => o.UserId == user.Id).ToList();
+
+            if (orders.IsNullOrEmpty())
+            {
+                var failedResponse = new
+                {
+                    Success = false,
+                    Message = "No orders found in the database."
+                };
+                return BadRequest(failedResponse);
+            }
+
+            return Ok(orders);
+        }
+
 
         [HttpGet("GetAllOrders")]
         [Authorize(Roles = "EMPLOYEE,OWNER")]
@@ -126,6 +162,11 @@ namespace DominionWarehouseAPI.Controllers
             if(order == null)
             {
                 return BadRequest("The requested order cannot be found");
+            }
+
+            if (!order.OrderStatus.Equals("Processing"))
+            {
+                return BadRequest("The order has been finished and cannot accept editing.");
             }
 
             order.PhoneNumber = request.PhoneNumber;
