@@ -70,7 +70,17 @@ namespace DominionWarehouseAPI.Controllers
         [Authorize(Roles = "ADMIN,OWNER,EMPLOYEE,BUYER")]
         public IActionResult GetAllProductsFromWarehouse(int id)
         {
-            var prodsinwh = dbContext.ProductsInWarehouses.Include(piw => piw.Product).Where(p => p.WarehouseId == id).ToList();
+            var prodsinwh = dbContext.ProductsInWarehouses.
+                Where(piw => piw.WarehouseId == id && piw.Quantity > 0).
+                Include(piw => piw.Product).
+                Select(p => new
+                {
+                    Id = p.ProductId,
+                    ProductName = p.Product.ProductName,
+                    ProductDescription = p.Product.ProductDescription,
+                    ProductPrice = p.Product.ProductPriceForSelling,
+                    ProductImageUrl = p.Product.ProductImageURL,
+                }).ToList();
 
             if(prodsinwh.IsNullOrEmpty())
             {
