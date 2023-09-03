@@ -225,7 +225,7 @@ namespace DominionWarehouseAPI.Controllers
 
             dbContext.SaveChanges();
 
-            return Ok(new { Success = true, Message = "The order has been finalized." });
+            return Ok(new { Success = true, Message = "The order has been canceled." });
         }
     }
 }

@@ -34,6 +34,6 @@ namespace DominionWarehouseAPI.Models
 
         public string PhoneNumber { get; set; }
 
-        public string CommentFromEmployee { get; set; }
+        public string? CommentFromEmployee { get; set; }
     }
 }
