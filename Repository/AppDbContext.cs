@@ -120,6 +120,9 @@ namespace DominionWarehouseAPI.Database
                 .HasOne(op => op.Product)
                 .WithMany(p => p.OrderProducts)
                 .HasForeignKey(op => op.ProductId);
+
+            //seed roles
+            SeedRolesData(modelBuilder);
         }
         public override int SaveChanges()
         {
@@ -141,6 +144,17 @@ namespace DominionWarehouseAPI.Database
                 }
             }
             return base.SaveChanges();
+        }
+
+        //seed roles
+        private void SeedRolesData(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Roles>().HasData(
+                new Roles { Id = 1, RoleName = "EMPLOYEE" },
+                new Roles { Id = 2, RoleName = "ADMIN" },
+                new Roles { Id = 3, RoleName = "OWNER" },
+                new Roles { Id = 4, RoleName = "BUYER" }
+            );
         }
 
     }

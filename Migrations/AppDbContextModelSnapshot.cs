@@ -199,6 +199,28 @@ namespace DominionWarehouseAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            RoleName = "EMPLOYEE"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            RoleName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            RoleName = "OWNER"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            RoleName = "BUYER"
+                        });
                 });
 
             modelBuilder.Entity("DominionWarehouseAPI.Models.ShoppingCart", b =>

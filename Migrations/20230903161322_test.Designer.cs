@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DominionWarehouseAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20230903153613_AddedNullCommentFromEmployee")]
-    partial class AddedNullCommentFromEmployee
+    [Migration("20230903161322_test")]
+    partial class test
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -202,6 +202,28 @@ namespace DominionWarehouseAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            RoleName = "EMPLOYEE"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            RoleName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            RoleName = "OWNER"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            RoleName = "BUYER"
+                        });
                 });
 
             modelBuilder.Entity("DominionWarehouseAPI.Models.ShoppingCart", b =>

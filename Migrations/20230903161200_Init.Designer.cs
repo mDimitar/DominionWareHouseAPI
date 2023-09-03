@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DominionWarehouseAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20230814094616_addedProductPrice")]
-    partial class addedProductPrice
+    [Migration("20230903161200_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -54,11 +54,19 @@ namespace DominionWarehouseAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("CommentFromEmployee")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("OrderStatus")
-                        .HasColumnType("int");
+                    b.Property<string>("OrderStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ShoppingCartId")
                         .HasColumnType("int");
@@ -69,7 +77,7 @@ namespace DominionWarehouseAPI.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<int>("soldFromEmployeeId")
+                    b.Property<int?>("soldFromEmployeeId")
                         .HasColumnType("int");
 
                     b.Property<int>("soldFromWarehouseId")
@@ -82,6 +90,24 @@ namespace DominionWarehouseAPI.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("DominionWarehouseAPI.Models.OrderProduct", b =>
+                {
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("OrderId", "ProductId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductsInOrder");
                 });
 
             modelBuilder.Entity("DominionWarehouseAPI.Models.Product", b =>
@@ -100,11 +126,18 @@ namespace DominionWarehouseAPI.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<string>("ProductImageURL")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ProductName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ProductPrice")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductPriceForSelling")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -169,6 +202,28 @@ namespace DominionWarehouseAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            RoleName = "EMPLOYEE"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            RoleName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            RoleName = "OWNER"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            RoleName = "BUYER"
+                        });
                 });
 
             modelBuilder.Entity("DominionWarehouseAPI.Models.ShoppingCart", b =>
@@ -178,6 +233,9 @@ namespace DominionWarehouseAPI.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("TotalPrice")
+                        .HasColumnType("int");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -268,6 +326,25 @@ namespace DominionWarehouseAPI.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("DominionWarehouseAPI.Models.OrderProduct", b =>
+                {
+                    b.HasOne("DominionWarehouseAPI.Models.Order", "Order")
+                        .WithMany("OrderProducts")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DominionWarehouseAPI.Models.Product", "Product")
+                        .WithMany("OrderProducts")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("DominionWarehouseAPI.Models.Product", b =>
                 {
                     b.HasOne("DominionWarehouseAPI.Models.Category", "Category")
@@ -355,8 +432,15 @@ namespace DominionWarehouseAPI.Migrations
                     b.Navigation("Products");
                 });
 
+            modelBuilder.Entity("DominionWarehouseAPI.Models.Order", b =>
+                {
+                    b.Navigation("OrderProducts");
+                });
+
             modelBuilder.Entity("DominionWarehouseAPI.Models.Product", b =>
                 {
+                    b.Navigation("OrderProducts");
+
                     b.Navigation("ProductShoppingCarts");
 
                     b.Navigation("WarehouseProducts");

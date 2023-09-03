@@ -23,7 +23,6 @@ namespace DominionWarehouseAPI.Controllers
         }
 
         [HttpGet("Roles")]
-        [Authorize(Roles = "ADMIN")]
         public async Task<ActionResult<Warehouse>> GetAllRoles()
         {
             var roles = dbContext.Roles.ToList();

@@ -1,11 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
+
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
 namespace DominionWarehouseAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -44,7 +47,10 @@ namespace DominionWarehouseAPI.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ProductName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ProductDescription = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    CategoryId = table.Column<int>(type: "int", nullable: false)
+                    CategoryId = table.Column<int>(type: "int", nullable: false),
+                    ProductImageURL = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProductPrice = table.Column<int>(type: "int", nullable: false),
+                    ProductPriceForSelling = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -63,7 +69,7 @@ namespace DominionWarehouseAPI.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    WorksAt = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    WorksAtWarehouse = table.Column<int>(type: "int", nullable: true),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     RoleId = table.Column<int>(type: "int", nullable: false),
                     ShoppingCartId = table.Column<int>(type: "int", nullable: true)
@@ -85,7 +91,8 @@ namespace DominionWarehouseAPI.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<int>(type: "int", nullable: false)
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    TotalPrice = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -127,8 +134,13 @@ namespace DominionWarehouseAPI.Migrations
                     UserId = table.Column<int>(type: "int", nullable: false),
                     TotalSum = table.Column<int>(type: "int", nullable: false),
                     Comment = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    OrderStatus = table.Column<int>(type: "int", nullable: false),
-                    ShoppingCartId = table.Column<int>(type: "int", nullable: false)
+                    OrderStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ShoppingCartId = table.Column<int>(type: "int", nullable: false),
+                    soldFromWarehouseId = table.Column<int>(type: "int", nullable: false),
+                    soldFromEmployeeId = table.Column<int>(type: "int", nullable: true),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CommentFromEmployee = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -198,6 +210,42 @@ namespace DominionWarehouseAPI.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "ProductsInOrder",
+                columns: table => new
+                {
+                    OrderId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductsInOrder", x => new { x.OrderId, x.ProductId });
+                    table.ForeignKey(
+                        name: "FK_ProductsInOrder_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProductsInOrder_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Roles",
+                columns: new[] { "Id", "RoleName" },
+                values: new object[,]
+                {
+                    { 1, "EMPLOYEE" },
+                    { 2, "ADMIN" },
+                    { 3, "OWNER" },
+                    { 4, "BUYER" }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Orders_ShoppingCartId",
                 table: "Orders",
@@ -212,6 +260,11 @@ namespace DominionWarehouseAPI.Migrations
                 name: "IX_Products_CategoryId",
                 table: "Products",
                 column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductsInOrder_ProductId",
+                table: "ProductsInOrder",
+                column: "ProductId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProductsInShoppingCarts_ShoppingCartId",
@@ -244,7 +297,7 @@ namespace DominionWarehouseAPI.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Orders");
+                name: "ProductsInOrder");
 
             migrationBuilder.DropTable(
                 name: "ProductsInShoppingCarts");
@@ -253,13 +306,16 @@ namespace DominionWarehouseAPI.Migrations
                 name: "ProductsInWarehouses");
 
             migrationBuilder.DropTable(
-                name: "ShoppingCart");
+                name: "Orders");
 
             migrationBuilder.DropTable(
                 name: "Products");
 
             migrationBuilder.DropTable(
                 name: "Warehouse");
+
+            migrationBuilder.DropTable(
+                name: "ShoppingCart");
 
             migrationBuilder.DropTable(
                 name: "Categories");
