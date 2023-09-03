@@ -30,7 +30,7 @@ namespace DominionWarehouseAPI.Controllers
 
             string username = User.FindFirstValue(ClaimTypes.Name);
 
-            var user = dbContext.Users.FirstOrDefault(u => u.Username == username);
+            var user = dbContext.Users.Include(r => r.Role).FirstOrDefault(u => u.Username == username);
 
             if (user.Role.RoleName.Equals("ADMIN"))
             {
