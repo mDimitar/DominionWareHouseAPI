@@ -49,6 +49,12 @@ namespace DominionWarehouseAPI.Controllers
         [HttpPost("Register")]
         public ActionResult<User> Register(UserDTOforRegistering request)
         {
+
+            if(request.Username.IsNullOrEmpty() || request.Password.IsNullOrEmpty())
+            {
+                return BadRequest(new { Success = false, Message = "Both fields are required." });
+            }
+
             var userExists = dbContext.Users.Any(user => user.Username == request.Username);
 
             if (userExists)
