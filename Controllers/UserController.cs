@@ -81,6 +81,12 @@ namespace DominionWarehouseAPI.Controllers
         [HttpPost("Login")]
         public ActionResult<User> Login(UserDTOforLogin request)
         {
+
+            if (request.Username.IsNullOrEmpty() || request.Password.IsNullOrEmpty())
+            {
+                return BadRequest(new { Success = false, Message = "Both fields are required." });
+            }
+
             var userExists = dbContext.Users.Any(user => user.Username == request.Username);
 
             if (!userExists)

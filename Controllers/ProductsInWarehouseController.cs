@@ -66,12 +66,15 @@ namespace DominionWarehouseAPI.Controllers
             return Ok(products);
         }
 
-        [HttpGet("GetProductsFromWarehouse/{id}")]
+        [HttpGet("GetProductsFromWarehouse")]
         [Authorize(Roles = "ADMIN,OWNER,EMPLOYEE,BUYER")]
-        public IActionResult GetAllProductsFromWarehouse(int id)
+        public IActionResult GetAllProductsFromWarehouse()
         {
+
+            var wh = dbContext.Warehouse.First();
+
             var prodsinwh = dbContext.ProductsInWarehouses.
-                Where(piw => piw.WarehouseId == id && piw.Quantity > 0).
+                Where(piw => piw.WarehouseId == wh.Id && piw.Quantity > 0).
                 Include(piw => piw.Product).
                 Select(p => new
                 {

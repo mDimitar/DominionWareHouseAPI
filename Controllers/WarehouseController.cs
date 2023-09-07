@@ -23,6 +23,7 @@ namespace DominionWarehouseAPI.Controllers
             _configuration = configuration;
         }
 
+
         [HttpGet("Warehouses")]
         [Authorize(Roles = "OWNER,ADMIN")]
         public async Task<ActionResult<Warehouse>> GetAllWarehouses()
