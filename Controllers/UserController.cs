@@ -103,7 +103,7 @@ namespace DominionWarehouseAPI.Controllers
 
             string token = CreateToken(user);
 
-            return Ok(new { Success = true, Message = "Token successfully generated", Token = token });
+            return Ok(new { Success = true,User = user.Username ,Message = "Token successfully generated", Token = token, ExpiresAt = DateTimeOffset.Now.AddHours(8).ToUnixTimeMilliseconds() });
         }
 
         private string CreateToken(User user)

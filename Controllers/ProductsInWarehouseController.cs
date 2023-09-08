@@ -67,11 +67,15 @@ namespace DominionWarehouseAPI.Controllers
         }
 
         [HttpGet("GetProductsFromWarehouse")]
-        [Authorize(Roles = "ADMIN,OWNER,EMPLOYEE,BUYER")]
         public IActionResult GetAllProductsFromWarehouse()
         {
 
             var wh = dbContext.Warehouse.First();
+
+            if(wh == null)
+            {
+                return BadRequest(new { Success = false, Message = "No warehouse found in the database." });
+            }
 
             var prodsinwh = dbContext.ProductsInWarehouses.
                 Where(piw => piw.WarehouseId == wh.Id && piw.Quantity > 0).
