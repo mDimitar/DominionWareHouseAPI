@@ -103,7 +103,7 @@ namespace DominionWarehouseAPI.Controllers
 
             string token = CreateToken(user);
 
-            return Ok(new { Success = true,User = user.Username,Role = user.Role.RoleName,Message = "Token successfully generated", Token = token, ExpiresAt = DateTimeOffset.Now.AddHours(8).ToUnixTimeMilliseconds() });
+            return Ok(new { Success = true,User = user.Username,Role = user.Role.RoleName,Message = "Token successfully generated", Token = token, ExpiresAt = DateTimeOffset.Now.AddHours(12).ToUnixTimeMilliseconds() });
         }
 
         private string CreateToken(User user)
@@ -120,7 +120,7 @@ namespace DominionWarehouseAPI.Controllers
 
             var token = new JwtSecurityToken(
                     claims: claims,
-                    expires: DateTime.Now.AddHours(8),
+                    expires: DateTime.Now.AddHours(12),
                     signingCredentials: credentials
                 );
 

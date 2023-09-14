@@ -36,18 +36,21 @@ namespace DominionWarehouseAPI.Controllers
                         .Where(sc => sc.ShoppingCartId == user.ShoppingCartId)
                         join product in dbContext.Products
                         on psc.ProductId equals product.Id
-                        select new ShoppingCartInfoReturn
+                        select new 
                         {
                             Id = product.Id,
+                            ProductImage = product.ProductImageURL,
                             ProductName = product.ProductName,
                             ProductDescription = product.ProductDescription,
+                            ProductPrice = product.ProductPriceForSelling,
                             Quantity = psc.Quantity
                         };
 
             var response = new
             {
                 Products = query,
-                TotalPrice = user.ShoppingCart.TotalPrice
+                TotalPrice = user.ShoppingCart.TotalPrice,
+                Quantity = query.Count(),
             };
 
             if (response.Products.IsNullOrEmpty())
@@ -68,7 +71,12 @@ namespace DominionWarehouseAPI.Controllers
                     return BadRequest("Quantity of 0 or less cannot be added to the shopping cart.");
                 }
 
-                var product = await dbContext.Products.FindAsync(productDTO.ProductId);
+                var product = await dbContext.ProductsInWarehouses.Include(p => p.Product).FirstOrDefaultAsync(p => p.ProductId == productDTO.ProductId);
+
+                if(productDTO.Quantity > dbContext.ProductsInWarehouses.FirstOrDefault(p => p.ProductId == productDTO.ProductId).Quantity)
+                {
+                    return BadRequest(new { Success = false, Message = "The requested product is not available in that quantity" });
+                }
 
                 if (product == null)
                 {
@@ -90,8 +98,8 @@ namespace DominionWarehouseAPI.Controllers
                 if (existingProduct != null)
                 {
                     shoppingCart.TotalPrice = shoppingCart.TotalPrice - 
-                        (existingProduct.Quantity * product.ProductPriceForSelling) +
-                        (productDTO.Quantity * product.ProductPriceForSelling);
+                        (existingProduct.Quantity * product.Product.ProductPriceForSelling) +
+                        (productDTO.Quantity * product.Product.ProductPriceForSelling);
 
                     existingProduct.Quantity = productDTO.Quantity;
                 }
@@ -106,7 +114,7 @@ namespace DominionWarehouseAPI.Controllers
                     
                     shoppingCart.ProductShoppingCarts.Add(productToBeAdded);
 
-                    shoppingCart.TotalPrice += productToBeAdded.Quantity * product.ProductPriceForSelling;
+                    shoppingCart.TotalPrice += productToBeAdded.Quantity * product.Product.ProductPriceForSelling;
                 }
 
                 await dbContext.SaveChangesAsync();
@@ -124,7 +132,7 @@ namespace DominionWarehouseAPI.Controllers
         {
 
             string username = User.FindFirstValue(ClaimTypes.Name);
-            var user = dbContext.Users.FirstOrDefault(u => u.Username == username);
+            var user = dbContext.Users.Include(u => u.ShoppingCart).FirstOrDefault(u => u.Username == username);
 
             if (user == null)
             {
@@ -132,10 +140,13 @@ namespace DominionWarehouseAPI.Controllers
             }
 
             var userProdsInSc = await dbContext.ProductsInShoppingCarts.
+                Include(psc => psc.Product).
                 Where(sc => sc.ProductId == ProductId && sc.ShoppingCartId == user.ShoppingCartId)
                 .FirstOrDefaultAsync();
 
+
             dbContext.ProductsInShoppingCarts.Remove(userProdsInSc);
+            user.ShoppingCart.TotalPrice -= userProdsInSc.Product.ProductPriceForSelling * userProdsInSc.Quantity;
             dbContext.SaveChanges();
 
             return Ok(new { Success = true, Message = "Product has been deleted successfully from the shopping cart." });
