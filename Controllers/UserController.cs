@@ -34,7 +34,7 @@ namespace DominionWarehouseAPI.Controllers
             {
                 user.Id,
                 user.Username,
-                user.WorksAtWarehouse,
+                WorksAtWarehouse = dbContext.Warehouse.Where(wh => wh.Id == user.WorksAtWarehouse).FirstOrDefault().Name,
                 RoleName = user.Role.RoleName
             }).ToList();
 
@@ -138,10 +138,18 @@ namespace DominionWarehouseAPI.Controllers
         {
             var user = dbContext.Users.FirstOrDefault(u => u.Id == id);
 
+            if(userDTO.Password.IsNullOrEmpty())
+            {
+                user.Username = userDTO.Username == null ? user.Username : userDTO.Username;
+                user.WorksAtWarehouse = userDTO.WorksAtWarehouse == null ? user.WorksAtWarehouse : userDTO.WorksAtWarehouse;
+                user.RoleId = userDTO.RoleId == null ? user.RoleId : userDTO.RoleId;
+            }
+
             string NewPasswordHash = BCrypt.Net.BCrypt.HashPassword(userDTO.Password);
 
-            user.Username = userDTO.Username;
-            user.WorksAtWarehouse = userDTO.WorksAtWarehouse;
+            user.Username = userDTO.Username == null ? user.Username : userDTO.Username;
+            user.WorksAtWarehouse = userDTO.WorksAtWarehouse == null ?  user.WorksAtWarehouse : userDTO.WorksAtWarehouse;
+            user.RoleId = userDTO.RoleId == null ? user.RoleId : userDTO.RoleId;
             user.PasswordHash = NewPasswordHash;
 
             dbContext.SaveChanges();
