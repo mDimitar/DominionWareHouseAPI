@@ -70,7 +70,7 @@ namespace DominionWarehouseAPI.Controllers
         public IActionResult GetAllProductsFromWarehouse()
         {
 
-            var wh = dbContext.Warehouse.First();
+            var wh = dbContext.Warehouse.FirstOrDefault();
 
             if(wh == null)
             {
@@ -89,7 +89,7 @@ namespace DominionWarehouseAPI.Controllers
                     ProductImageUrl = p.Product.ProductImageURL,
                 }).ToList();
 
-            if(prodsinwh.IsNullOrEmpty())
+            if(prodsinwh.Any())
             {
                 return BadRequest(new { Success = false, Message = "There are no products in the warehouse at the moment" });
             }
