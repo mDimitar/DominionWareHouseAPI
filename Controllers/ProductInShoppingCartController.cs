@@ -66,7 +66,7 @@ namespace DominionWarehouseAPI.Controllers
         {
             try
             {
-                if(productDTO.Quantity < 0 || productDTO.Quantity == 0)
+                if(productDTO.Quantity < 0 || productDTO.Quantity == 0 || productDTO.Quantity == null)
                 {
                     return BadRequest("Quantity of 0 or less cannot be added to the shopping cart.");
                 }
@@ -97,11 +97,9 @@ namespace DominionWarehouseAPI.Controllers
 
                 if (existingProduct != null)
                 {
-                    shoppingCart.TotalPrice = shoppingCart.TotalPrice - 
-                        (existingProduct.Quantity * product.Product.ProductPriceForSelling) +
-                        (productDTO.Quantity * product.Product.ProductPriceForSelling);
+                    shoppingCart.TotalPrice += productDTO.Quantity * existingProduct.Product.ProductPriceForSelling;
 
-                    existingProduct.Quantity = productDTO.Quantity;
+                    existingProduct.Quantity += productDTO.Quantity; 
                 }
                 else
                 {

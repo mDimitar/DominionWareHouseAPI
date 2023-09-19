@@ -57,6 +57,10 @@ namespace DominionWarehouseAPI.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("DeliveryAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("OrderStatus")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -243,6 +247,14 @@ namespace DominionWarehouseAPI.Migrations
                         .IsUnique();
 
                     b.ToTable("ShoppingCart");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            TotalPrice = 0,
+                            UserId = 1
+                        });
                 });
 
             modelBuilder.Entity("DominionWarehouseAPI.Models.User", b =>
@@ -261,7 +273,7 @@ namespace DominionWarehouseAPI.Migrations
                         .IsRequired()
                         .HasColumnType("int");
 
-                    b.Property<int?>("ShoppingCartId")
+                    b.Property<int>("ShoppingCartId")
                         .HasColumnType("int");
 
                     b.Property<string>("Username")
@@ -276,6 +288,16 @@ namespace DominionWarehouseAPI.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("Users", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            PasswordHash = "$2a$11$w2JtjlJNeduprHSUQU2YNOiWJsKsi6s1dpPp.KJJO1yHTvPQ5DHha",
+                            RoleId = 2,
+                            ShoppingCartId = 1,
+                            Username = "dominionadmin"
+                        });
                 });
 
             modelBuilder.Entity("DominionWarehouseAPI.Models.Warehouse", b =>

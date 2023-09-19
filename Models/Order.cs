@@ -33,7 +33,7 @@ namespace DominionWarehouseAPI.Models
         public ICollection<OrderProduct> OrderProducts { get; set; } //this added
 
         public string PhoneNumber { get; set; }
-
         public string? CommentFromEmployee { get; set; }
+        public string DeliveryAddress { get; set; }
     }
 }

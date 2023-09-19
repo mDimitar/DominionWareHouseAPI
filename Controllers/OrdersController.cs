@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace DominionWarehouseAPI.Controllers
@@ -43,7 +44,9 @@ namespace DominionWarehouseAPI.Controllers
                     ShoppingCartId = order.ShoppingCartId,
                     soldFromWarehouseId = order.soldFromWarehouseId,
                     soldFromEmployeeId = order.soldFromEmployeeId,
-                    DateCreated = order.DateCreated
+                    DateCreated = order.DateCreated.ToString("MM/dd/yyyy HH:mm"),
+                    PhoneNumber = order.PhoneNumber,
+                    CommentFromEmployee = order.CommentFromEmployee,
                 })
                 .Where(o => o.UserId == user.Id).ToList();
 
@@ -91,6 +94,21 @@ namespace DominionWarehouseAPI.Controllers
 
             var user = dbContext.Users.Include(u => u.ShoppingCart).FirstOrDefault(u => u.Username == username);
 
+            var prodsInShoppingCart = dbContext.ProductsInShoppingCarts
+                 .Where(sc => sc.ShoppingCartId == user.ShoppingCartId).ToList();
+
+            if (prodsInShoppingCart.IsNullOrEmpty())
+            {
+                return BadRequest(new { Success = false, Message = "There are no products in the shopping cart." });
+            }
+
+            var wh = dbContext.Warehouse.First();
+
+            if (request.PhoneNumber.IsNullOrEmpty() || request.DeliveryAddress.IsNullOrEmpty())
+            {
+                return BadRequest(new { Success = false, Message = "Phone number and delivery address are required fields." });
+            }
+
             var neworder = new Order
             {
                 UserId = user.Id,
@@ -98,21 +116,15 @@ namespace DominionWarehouseAPI.Controllers
                 TotalSum = user.ShoppingCart.TotalPrice,
                 OrderStatus = OrderStatus.Processing,
                 ShoppingCartId = user.ShoppingCart.Id,
-                soldFromWarehouseId = request.soldFromWarehouseId,
+                soldFromWarehouseId = wh.Id,
                 PhoneNumber = request.PhoneNumber,
+                DeliveryAddress = request.DeliveryAddress,
                 soldFromEmployeeId = null //later to be assigned when finalizing order
             };
 
             dbContext.Orders.Add(neworder);
             dbContext.SaveChanges();
 
-            var prodsInShoppingCart = dbContext.ProductsInShoppingCarts
-                .Where(sc => sc.ShoppingCartId == user.ShoppingCartId).ToList();
-
-            if(prodsInShoppingCart.IsNullOrEmpty())
-            {
-                return BadRequest(new { Success = false, Message = "There are no products in the shopping cart" });
-            }
 
             foreach (var product in prodsInShoppingCart)
             {
@@ -139,7 +151,7 @@ namespace DominionWarehouseAPI.Controllers
         }
 
         [HttpPut("EditOrder/{id}")]
-        [Authorize(Roles = "BUYER")]
+        [Authorize]
         public async Task<IActionResult> EditOrder(int id, OrderEditDTO request)
         {
             var order = dbContext.Orders.FirstOrDefault(o => o.Id == id);
@@ -149,13 +161,13 @@ namespace DominionWarehouseAPI.Controllers
                 return BadRequest(new {Success = false ,Message = "The requested order cannot be found"});
             }
 
-            if (!order.OrderStatus.Equals("Processing"))
+            if (order.OrderStatus.Equals("Canceled"))
             {
                 return BadRequest(new {Success = false, Message = "The order have been closed and cannot accept editing." });
             }
 
-            order.PhoneNumber = request.PhoneNumber;
-            order.Comment = request.Comment;
+            order.PhoneNumber = request.PhoneNumber.IsNullOrEmpty() ? order.PhoneNumber : request.PhoneNumber;
+            order.Comment = request.Comment.IsNullOrEmpty() ? order.Comment : request.Comment;
 
             dbContext.SaveChanges();
 

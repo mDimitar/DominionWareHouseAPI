@@ -3,7 +3,7 @@
     public class OrderDTO
     {
         public string Comment { get; set; }
-        public int soldFromWarehouseId { get; set; }
         public string PhoneNumber { get; set; }
+        public string DeliveryAddress { get; set; }
     }
 }

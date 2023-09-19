@@ -1,4 +1,5 @@
-﻿using DominionWarehouseAPI.Models;
+﻿using Azure.Core;
+using DominionWarehouseAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DominionWarehouseAPI.Database
@@ -123,6 +124,7 @@ namespace DominionWarehouseAPI.Database
 
             //seed roles
             SeedRolesData(modelBuilder);
+            SeedAdminUserData(modelBuilder);
         }
         public override int SaveChanges()
         {
@@ -143,6 +145,7 @@ namespace DominionWarehouseAPI.Database
                     user.ShoppingCartId = newShoppingCart.Id;
                 }
             }
+
             return base.SaveChanges();
         }
 
@@ -155,6 +158,27 @@ namespace DominionWarehouseAPI.Database
                 new Roles { Id = 3, RoleName = "OWNER" },
                 new Roles { Id = 4, RoleName = "BUYER" }
             );
+        }
+
+        public void SeedAdminUserData(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ShoppingCart>().HasData(
+                new ShoppingCart
+                {
+                    Id = 1,
+                    UserId = 1,
+                    TotalPrice = 0
+                });
+
+            modelBuilder.Entity<User>().HasData(
+                new User
+                {
+                    Id = 1,
+                    Username = "dominionadmin",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("DominionAdmin123!"),
+                    ShoppingCartId = 1,
+                    RoleId = 2,
+                });
         }
 
     }
