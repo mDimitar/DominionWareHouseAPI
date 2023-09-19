@@ -134,7 +134,7 @@ namespace DominionWarehouseAPI.Controllers
 
         [HttpPut("EditUser/{id}")]
         [Authorize(Roles = "ADMIN,OWNER")]
-        public IActionResult EditUser(int id, [FromBody] UserDTOforRegistering userDTO)
+        public IActionResult EditUser(int id, [FromBody] UserDTOForEdit userDTO)
         {
             var user = dbContext.Users.FirstOrDefault(u => u.Id == id);
 
@@ -143,6 +143,8 @@ namespace DominionWarehouseAPI.Controllers
                 user.Username = userDTO.Username == null ? user.Username : userDTO.Username;
                 user.WorksAtWarehouse = userDTO.WorksAtWarehouse == null ? user.WorksAtWarehouse : userDTO.WorksAtWarehouse;
                 user.RoleId = userDTO.RoleId == null ? user.RoleId : userDTO.RoleId;
+                dbContext.SaveChanges();
+                return Ok(new { Success = true, Message = "The user data has been successfully updated." });
             }
 
             string NewPasswordHash = BCrypt.Net.BCrypt.HashPassword(userDTO.Password);
