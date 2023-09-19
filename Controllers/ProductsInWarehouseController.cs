@@ -127,7 +127,7 @@ namespace DominionWarehouseAPI.Controllers
             return Ok(new {Success =  true, Message = "The product has been successfully added to the warehouse."});
         }
 
-        [HttpPost("EditProductInWarehouse/")]
+        [HttpPost("EditProductInWarehouse")]
         [Authorize(Roles = "ADMIN,OWNER,EMPLOYEE")]
         public IActionResult EditProductInWarehouse(ProductWarehouseDTOForEdit request)
         {
