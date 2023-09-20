@@ -1,4 +1,5 @@
-﻿using DominionWarehouseAPI.Database;
+﻿using Azure.Core;
+using DominionWarehouseAPI.Database;
 using DominionWarehouseAPI.Models;
 using DominionWarehouseAPI.Models.Data_Transfer_Objects;
 using Microsoft.AspNetCore.Authorization;
@@ -8,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace DominionWarehouseAPI.Controllers
 {
@@ -50,9 +52,9 @@ namespace DominionWarehouseAPI.Controllers
         public ActionResult<User> Register(UserDTOforRegistering request)
         {
 
-            if(request.Username.IsNullOrEmpty() || request.Password.IsNullOrEmpty())
+            if(request.Username.IsNullOrEmpty() || request.Password.IsNullOrEmpty() || request.RoleId.Equals(null))
             {
-                return BadRequest(new { Success = false, Message = "Both fields are required." });
+                return BadRequest(new { Success = false, Message = "Username,Password and Role are required fields." });
             }
 
             var userExists = dbContext.Users.Any(user => user.Username == request.Username);
@@ -60,6 +62,11 @@ namespace DominionWarehouseAPI.Controllers
             if (userExists)
             {
                 return BadRequest(new { Success = false, Message = "The user already exists.Please enter a new username." });
+            }
+
+            if((request.RoleId.Equals(1) || request.RoleId.Equals(3)) && request.WorksAtWarehouse.Equals(null))
+            {
+                return BadRequest(new { Success = false, Message = "Employee or Owner cannot be set for an undefined warehouse" });
             }
 
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
@@ -138,26 +145,38 @@ namespace DominionWarehouseAPI.Controllers
         {
             var user = dbContext.Users.FirstOrDefault(u => u.Id == id);
 
-            if(userDTO.Password.IsNullOrEmpty())
+            if (!IsValidString(userDTO.Password) && !IsValidString(userDTO.Username))
             {
-                user.Username = userDTO.Username == null ? user.Username : userDTO.Username;
-                user.WorksAtWarehouse = userDTO.WorksAtWarehouse == null ? user.WorksAtWarehouse : userDTO.WorksAtWarehouse;
-                user.RoleId = userDTO.RoleId == null ? user.RoleId : userDTO.RoleId;
-                dbContext.SaveChanges();
-                return Ok(new { Success = true, Message = "The user data has been successfully updated." });
+                return BadRequest(new { Success = false, Message = "Invalid data" });
             }
 
-            string NewPasswordHash = BCrypt.Net.BCrypt.HashPassword(userDTO.Password);
+            if (!IsValidString(userDTO.Username))
+            {
+                return BadRequest(new { Success = false, Message = "Invalid Username" });
+            }
 
-            user.Username = userDTO.Username == null ? user.Username : userDTO.Username;
-            user.WorksAtWarehouse = userDTO.WorksAtWarehouse == null ?  user.WorksAtWarehouse : userDTO.WorksAtWarehouse;
-            user.RoleId = userDTO.RoleId == null ? user.RoleId : userDTO.RoleId;
-            user.PasswordHash = NewPasswordHash;
+            if(!IsValidString(userDTO.Password))
+            {
+                return BadRequest(new { Success = false, Message = "Invalid Password" });
+            }
+
+            if((userDTO.RoleId.Equals(1) || userDTO.RoleId.Equals(3)) && userDTO.WorksAtWarehouse == null)
+            {
+                return BadRequest(new { Success = false, Message = "Employee or Owner cannot be set for an undefined warehouse" });
+            }
+
+            user.Username = userDTO.Username.IsNullOrEmpty() ? user.Username : userDTO.Username;
+            user.PasswordHash = userDTO.Password == null ? user.PasswordHash : BCrypt.Net.BCrypt.HashPassword(userDTO.Password);
+            user.WorksAtWarehouse = userDTO.WorksAtWarehouse;
+            user.RoleId = userDTO.RoleId  == null ? user.RoleId : userDTO.RoleId;
 
             dbContext.SaveChanges();
 
             return Ok(new { Success = true, Message = "The user data has been successfully updated." });
         }
+
+
+
 
         [HttpDelete("DeleteUser/{id}")]
         [Authorize(Roles = "OWNER,ADMIN")]
@@ -175,6 +194,19 @@ namespace DominionWarehouseAPI.Controllers
             dbContext.SaveChanges();
 
             return Ok(new { Success = true, Message = "The user has beed successfully deleted" });
+        }
+
+        //helper method
+        static bool IsValidString(string input)
+        {
+            string validPattern = "^[a-zA-Z0-9!@#$%^&*]+$";
+
+            if (input.IsNullOrEmpty())
+            {
+                return true;
+            }
+
+            return Regex.IsMatch(input, validPattern) && !string.IsNullOrWhiteSpace(input);
         }
 
     }

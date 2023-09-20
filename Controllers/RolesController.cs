@@ -46,9 +46,14 @@ namespace DominionWarehouseAPI.Controllers
                 return BadRequest(new { Success = false, Message = "The role already exists." });
             }
 
+            if(role.RoleName.IsNullOrEmpty())
+            {
+                return BadRequest(new { Success = false, Message = "Invalid role name." });
+            }
+
             var newRole = new Roles
             {
-                RoleName = role.RoleName,
+                RoleName = role.RoleName.Trim().ToUpper(),
             };
 
             dbContext.Roles.Add(newRole);

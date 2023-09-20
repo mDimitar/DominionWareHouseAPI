@@ -2,9 +2,9 @@
 {
     public class UserDTOforRegistering
     {
-        public required string Username { get; set; }
-        public required string Password { get; set; }
-        public required int RoleId { get; set; }
+        public string? Username { get; set; }
+        public string? Password { get; set; }
+        public int? RoleId { get; set; }
         public int? WorksAtWarehouse { get; set; }
     }
 }
