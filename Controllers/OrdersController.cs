@@ -26,7 +26,7 @@ namespace DominionWarehouseAPI.Controllers
         }
 
         [HttpGet("GetAllOrdersForBuyer")]
-        [Authorize(Roles = "BUYER")]
+        [Authorize(Roles = "BUYER,ADMIN,OWNER,EMPLOYEE")]
         public IActionResult GetAllOrdersForBuyer()
         {
             string username = User.FindFirstValue(ClaimTypes.Name);
@@ -87,7 +87,7 @@ namespace DominionWarehouseAPI.Controllers
         }
 
         [HttpPost("CreateOrder")]
-        [Authorize(Roles = "BUYER")]
+        [Authorize(Roles = "BUYER,OWNER,EMPLOYEE,ADMIN")]
         public IActionResult CreateOrder(OrderDTO request)
         {
             string username = User.FindFirstValue(ClaimTypes.Name);
@@ -176,7 +176,7 @@ namespace DominionWarehouseAPI.Controllers
         }
 
         [HttpPut("FinalizeOrder/{id}")]
-        [Authorize(Roles = "EMPLOYEE")]
+        [Authorize(Roles = "EMPLOYEE,OWNER")]
         public async Task<IActionResult> FinalizeOrder(int id)
         {
             string username = User.FindFirstValue(ClaimTypes.Name);
@@ -195,7 +195,7 @@ namespace DominionWarehouseAPI.Controllers
             var prodsInSc = dbContext.ProductsInShoppingCarts.Include(p => p.Product).
                 Where(psc => psc.ShoppingCartId == shoppingCartId).ToList();
 
-            var prodsInWarehouse = dbContext.Products.ToList();
+           // var prodsInWarehouse = dbContext.Products.ToList();
 
             foreach (var prod in prodsInSc)
             {
@@ -212,7 +212,7 @@ namespace DominionWarehouseAPI.Controllers
         }
 
         [HttpPut("CancelOrder/{id}")]
-        [Authorize(Roles = "BUYER,EMPLOYEE")]
+        [Authorize(Roles = "BUYER,EMPLOYEE,OWNER,ADMIN")]
         public async Task<IActionResult> CancelOrder(int id)
         {
 
@@ -234,6 +234,9 @@ namespace DominionWarehouseAPI.Controllers
             }
 
             order.OrderStatus = OrderStatus.Canceled;
+
+            //tbd: restore quantity when canceled.
+
 
             dbContext.SaveChanges();
 

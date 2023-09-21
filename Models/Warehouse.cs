@@ -16,6 +16,7 @@ namespace DominionWarehouseAPI.Models
         public int userId { get; set; }
         [JsonIgnore]
         public virtual User User{ get; set; }
+        [JsonIgnore]
         public ICollection<ProductsInWarehouse> WarehouseProducts { get; set; }
     }
 }

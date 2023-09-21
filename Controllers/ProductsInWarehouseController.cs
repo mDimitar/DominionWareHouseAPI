@@ -44,13 +44,18 @@ namespace DominionWarehouseAPI.Controllers
             return Ok(products);
         }
 
-        [HttpGet("FilterProductsFromWarehouseByString/{id}")]
-        public async Task<IActionResult> FilterProductsByIncomingString(string searchQuery) //api/warehouse/products?searchQuery=${searchQuery}
+        [HttpGet("FilterProductsFromWarehouseByString")]
+        public async Task<IActionResult> FilterProductsByIncomingString(string? q) 
         {
+            if (q.IsNullOrEmpty())
+            {
+                return Ok(dbContext.ProductsInWarehouses.ToList());
+            }
+
             var query = dbContext.ProductsInWarehouses
                 .Include(wp => wp.Product)
-                .Where(wp => wp.Product.ProductName.Contains(searchQuery) ||
-                             wp.Product.ProductDescription.Contains(searchQuery))
+                .Where(wp => wp.Product.ProductName.Contains(q) ||
+                             wp.Product.ProductDescription.Contains(q))
                 .Select(wp => new
                 {
                     wp.Product.Id,
@@ -87,9 +92,11 @@ namespace DominionWarehouseAPI.Controllers
                     ProductDescription = p.Product.ProductDescription,
                     ProductPrice = p.Product.ProductPriceForSelling,
                     ProductImageUrl = p.Product.ProductImageURL,
+                    ProductQuantity = p.Quantity,
+                    ReceivedBy = p.Received
                 }).ToList();
 
-            if(prodsinwh.Any())
+            if(!prodsinwh.Any())
             {
                 return BadRequest(new { Success = false, Message = "There are no products in the warehouse at the moment" });
             }
@@ -102,6 +109,21 @@ namespace DominionWarehouseAPI.Controllers
         public IActionResult AddProductToWareHouse(ProductWareHouseDTO request)
         {
 
+            if ((request.Quantity.Equals(null) || request.Quantity <= 0) && request.WarehouseId.Equals(null))
+            {
+                return BadRequest(new { Success = false, Message = "Both fields are required" });
+            }
+
+            if (request.Quantity.Equals(null) || request.Quantity <= 0)
+            {
+                return BadRequest(new { Success = false, Message = "Invalid quantity" });
+            }
+
+            if (request.WarehouseId.Equals(null))
+            {
+                return BadRequest(new { Success = false, Message = "Warehouse must be selected" });
+            }
+
             string username = User.FindFirstValue(ClaimTypes.Name);
 
             var prodToBeAdded = 
@@ -111,9 +133,9 @@ namespace DominionWarehouseAPI.Controllers
             {
                 var prodInWarehouse = new ProductsInWarehouse
                 {
-                    WarehouseId = request.WarehouseId,
-                    ProductId = request.ProductId,
-                    Quantity = request.Quantity,
+                    WarehouseId = (int)request.WarehouseId,
+                    ProductId = (int)request.ProductId,
+                    Quantity = (int)request.Quantity,
                     Received = username,
                 };
                 dbContext.ProductsInWarehouses.Add(prodInWarehouse);
@@ -121,7 +143,7 @@ namespace DominionWarehouseAPI.Controllers
             }
             else
             {
-                prodToBeAdded.Quantity += request.Quantity;
+                prodToBeAdded.Quantity += (int)request.Quantity;
                 dbContext.SaveChanges();
             }
             return Ok(new {Success =  true, Message = "The product has been successfully added to the warehouse."});

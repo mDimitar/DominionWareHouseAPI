@@ -182,6 +182,12 @@ namespace DominionWarehouseAPI.Controllers
         [Authorize(Roles = "OWNER,ADMIN")]
         public IActionResult DeleteUser(int id)
         {
+
+            if (id.Equals(1))
+            {
+                return BadRequest(new { Success = false, Message = "Admin account cannot be deleted" });
+            }
+
             var user = dbContext.Users.FirstOrDefault(u => u.Id == id);
 
             if (user == null)
