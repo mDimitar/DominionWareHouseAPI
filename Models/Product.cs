@@ -23,9 +23,8 @@ namespace DominionWarehouseAPI.Models
         [JsonIgnore]
         [Required]
         public ICollection<ProductsInWarehouse> WarehouseProducts { get; set; }
-
-        public int CategoryId { get; set; }
         [JsonIgnore]
+        public int CategoryId { get; set; }
         public Category Category { get; set; }
 
         public string ProductImageURL { get; set; }
@@ -34,6 +33,7 @@ namespace DominionWarehouseAPI.Models
 
         public int ProductPriceForSelling { get; set; }
 
+        [JsonIgnore]
         public ICollection<OrderProduct> OrderProducts { get; set; }
 
     }

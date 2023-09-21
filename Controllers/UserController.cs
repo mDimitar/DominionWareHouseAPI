@@ -199,7 +199,7 @@ namespace DominionWarehouseAPI.Controllers
         //helper method
         static bool IsValidString(string input)
         {
-            string validPattern = "^[a-zA-Z0-9!@#$%^&*]+$";
+            string validPattern = "^[a-zA-Z0-9!@#$%^&*]+( [a-zA-Z0-9!@#$%^&*]+)*$";
 
             if (input.IsNullOrEmpty())
             {

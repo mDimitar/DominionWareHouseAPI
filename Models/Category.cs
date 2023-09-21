@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace DominionWarehouseAPI.Models
 {
@@ -10,7 +11,7 @@ namespace DominionWarehouseAPI.Models
         public int Id { get; set; }
 
         public string CategoryName { get; set; }
-
+        [JsonIgnore]
         public ICollection<Product> Products { get; set; }
     }
 }
