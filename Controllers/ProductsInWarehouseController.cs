@@ -45,11 +45,23 @@ namespace DominionWarehouseAPI.Controllers
         }
 
         [HttpGet("FilterProductsFromWarehouseByString")]
-        public async Task<IActionResult> FilterProductsByIncomingString(string? q) 
+        public async Task<IActionResult> FilterProductsByIncomingString(string? q)
         {
-            if (q.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(q)) //modify this check so that it will accept nulls/empty/invalid strings and treat it as true
             {
-                return Ok(dbContext.ProductsInWarehouses.ToList());
+                var nonfiltered = dbContext.ProductsInWarehouses
+                .Include(wp => wp.Product)
+                .Select(wp => new
+                {
+                    Id = wp.ProductId,
+                    ProductName = wp.Product.ProductName,
+                    ProductDescription = wp.Product.ProductDescription,
+                    ProductPrice = wp.Product.ProductPriceForSelling,
+                    ProductImageUrl = wp.Product.ProductImageURL,
+                    ProductQuantity = wp.Quantity,
+                    ReceivedBy = wp.Received
+                });
+                return Ok(nonfiltered);
             }
 
             var query = dbContext.ProductsInWarehouses
@@ -58,12 +70,11 @@ namespace DominionWarehouseAPI.Controllers
                              wp.Product.ProductDescription.Contains(q))
                 .Select(wp => new
                 {
-                    wp.Product.Id,
-                    wp.Product.ProductName,
-                    wp.Product.ProductDescription,
-                    wp.Product.Category.CategoryName,
-                    wp.Product.ProductPriceForSelling,
-                    wp.Product.ProductImageURL,
+                    Id = wp.ProductId,
+                    ProductName = wp.Product.ProductName,
+                    ProductDescription = wp.Product.ProductDescription,
+                    ProductPrice = wp.Product.ProductPriceForSelling,
+                    ProductImageUrl = wp.Product.ProductImageURL,
                 });
 
             var products = await query.ToListAsync();
@@ -149,29 +160,6 @@ namespace DominionWarehouseAPI.Controllers
             return Ok(new {Success =  true, Message = "The product has been successfully added to the warehouse."});
         }
 
-        [HttpPost("EditProductInWarehouse")]
-        [Authorize(Roles = "ADMIN,OWNER,EMPLOYEE")]
-        public IActionResult EditProductInWarehouse(ProductWarehouseDTOForEdit request)
-        {
-            var prodToBeEdited =
-                dbContext.ProductsInWarehouses.
-                Include(p => p.Product).FirstOrDefault(p => p.ProductId == request.ProductId);
-
-            if (prodToBeEdited == null)
-            {
-                return BadRequest(new { Success = false, Message = "The product does not exist in the warehouse." });
-            }
-
-            prodToBeEdited.Quantity = request.Quantity;
-            prodToBeEdited.Product.ProductName = request.ProductName;
-            prodToBeEdited.Product.ProductImageURL = request.ProductImageUrl;
-            prodToBeEdited.Product.ProductName = request.ProductName;
-            prodToBeEdited.Product.ProductDescription = request.ProductDescription;
-
-            dbContext.SaveChanges();
-
-            return Ok(new { Success = true, Message = "The changes have been successfully registered" });
-        }
 
     }
 }
