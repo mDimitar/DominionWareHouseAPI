@@ -10,7 +10,7 @@ namespace DominionWarehouseAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles ="ADMIN,OWNER")]
+    [Authorize(Roles ="ADMIN,OWNER,EMPLOYEE")]
     public class CategoryController : ControllerBase
     {
 
@@ -23,6 +23,7 @@ namespace DominionWarehouseAPI.Controllers
             _configuration = configuration;
         }
 
+        [Authorize(Roles = "ADMIN,OWNER,EMPLOYEE")]
         [HttpGet("Categories")]
         public IActionResult GetAllCategories()
         {

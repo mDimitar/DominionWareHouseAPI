@@ -155,11 +155,28 @@ namespace DominionWarehouseAPI.Controllers
             else
             {
                 prodToBeAdded.Quantity += (int)request.Quantity;
+                prodToBeAdded.Received = username;
                 dbContext.SaveChanges();
             }
             return Ok(new {Success =  true, Message = "The product has been successfully added to the warehouse."});
         }
 
+        [HttpDelete("DeleteProductFromWarehouse/{productId}")]
+        [Authorize(Roles = "ADMIN,OWNER,EMPLOYEE")]
+        public IActionResult RemoveProductFromWarehouse(int productId)
+        {
+            var productToBeDeleted = dbContext.ProductsInWarehouses.FirstOrDefault(p => p.ProductId.Equals(productId));
+
+            if (productToBeDeleted.Equals(null))
+            {
+                BadRequest(new { Success = false, Message = "Product not found" });
+            }
+
+            dbContext.Remove(productToBeDeleted); 
+            dbContext.SaveChanges();
+
+            return Ok(new { Success = true, Message = "The product has been successfully removed from the warehouse." });
+        }
 
     }
 }

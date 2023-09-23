@@ -25,7 +25,7 @@ namespace DominionWarehouseAPI.Controllers
 
 
         [HttpGet("Warehouses")]
-        [Authorize(Roles = "OWNER,ADMIN")]
+        [Authorize(Roles = "OWNER,ADMIN,EMPLOYEE")]
         public async Task<ActionResult<Warehouse>> GetAllWarehouses()
         {
 
@@ -45,7 +45,7 @@ namespace DominionWarehouseAPI.Controllers
                 return Ok(dbContext.Warehouse.Include(u => u.User).ToList());
             }
 
-            var warehouses = await dbContext.Warehouse.Where(w => w.userId == user.Id).ToListAsync();
+            var warehouses = await dbContext.Warehouse.ToListAsync();
 
             if (warehouses.IsNullOrEmpty())
             {
@@ -121,7 +121,7 @@ namespace DominionWarehouseAPI.Controllers
             return Ok(new {Success = true, Message = "The changes has been successfully registered." });
         }
 
-        [HttpDelete("DeleteWarehouse/{id}")]
+        /*[HttpDelete("DeleteWarehouse/{id}")]
         [Authorize(Roles = "OWNER,ADMIN")]
         public IActionResult DeleteWarehouse(int id)
         {
@@ -137,7 +137,7 @@ namespace DominionWarehouseAPI.Controllers
             dbContext.SaveChanges();
 
             return Ok(new {Success = true, Message = "The changes has been successfully deleted." });
-        }
+        }*/
 
     }
 }
