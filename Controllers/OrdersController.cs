@@ -81,6 +81,7 @@ namespace DominionWarehouseAPI.Controllers
                     OrderCommentFromEmployee = order.CommentFromEmployee,
                     ProdsInOrder = order.OrderProducts.Select(op => new
                     {
+                        ProductId = op.ProductId,
                         Quantity = op.Quantity,
                         ProductName = op.Product.ProductName,
                         ProductDescription = op.Product.ProductDescription,
@@ -244,6 +245,7 @@ namespace DominionWarehouseAPI.Controllers
             }
 
             order.OrderStatus = OrderStatus.Canceled;
+            order.Comment = "Canceled from buyer.";
 
             //tbd: restore quantity when canceled.
 
