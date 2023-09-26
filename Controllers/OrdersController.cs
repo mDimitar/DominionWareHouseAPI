@@ -34,6 +34,7 @@ namespace DominionWarehouseAPI.Controllers
             var user = dbContext.Users.FirstOrDefault(u => u.Username == username);
 
             var orders = dbContext.Orders
+                .Include(o => o.OrderProducts)
                 .Select(order => new
                 {
                     Id = order.Id,
@@ -44,11 +45,12 @@ namespace DominionWarehouseAPI.Controllers
                     ShoppingCartId = order.ShoppingCartId,
                     soldFromWarehouseId = order.soldFromWarehouseId,
                     soldFromEmployeeId = order.soldFromEmployeeId,
-                    DateCreated = order.DateCreated.ToString("MM/dd/yyyy HH:mm"),
+                    DateCreated = order.DateCreated.ToString("f"),
                     PhoneNumber = order.PhoneNumber,
                     CommentFromEmployee = order.CommentFromEmployee,
                 })
                 .Where(o => o.UserId == user.Id).ToList();
+           
 
             if (orders.IsNullOrEmpty())
             {
@@ -67,14 +69,22 @@ namespace DominionWarehouseAPI.Controllers
                 .Select(order => new
                 {
                     Id = order.Id,
-                    UserId = order.UserId,
+                    Username = order.User.Username,
                     TotalSum = order.TotalSum,
                     Comment = order.Comment,
                     OrderStatus = order.OrderStatus,
                     ShoppingCartId = order.ShoppingCartId,
                     soldFromWarehouseId = order.soldFromWarehouseId,
                     soldFromEmployeeId = order.soldFromEmployeeId,
-                    DateCreated = order.DateCreated
+                    DateCreated = order.DateCreated.ToString("f"),
+                    OrderAddress = order.DeliveryAddress,
+                    OrderCommentFromEmployee = order.CommentFromEmployee,
+                    ProdsInOrder = order.OrderProducts.Select(op => new
+                    {
+                        Quantity = op.Quantity,
+                        ProductName = op.Product.ProductName,
+                        ProductDescription = op.Product.ProductDescription,
+                    }).ToList(),
                 })
                 .ToList();
 
