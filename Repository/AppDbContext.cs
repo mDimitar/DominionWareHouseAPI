@@ -26,6 +26,7 @@ namespace DominionWarehouseAPI.Database
         public DbSet<ProductsInWarehouse> ProductsInWarehouses { get; set; }
 
         public DbSet<OrderProduct> ProductsInOrder { get; set; }
+        public DbSet<ReceivedGoodsBy> ReceivedGoodsBy { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -121,6 +122,19 @@ namespace DominionWarehouseAPI.Database
                 .HasOne(op => op.Product)
                 .WithMany(p => p.OrderProducts)
                 .HasForeignKey(op => op.ProductId);
+
+            modelBuilder.Entity<ReceivedGoodsBy>()
+                .HasKey(rg => rg.Id);
+
+            modelBuilder.Entity<ReceivedGoodsBy>()
+                .HasOne(rg => rg.User)
+                .WithMany(u => u.ReceivedGoods)
+                .HasForeignKey(rg => rg.UserId);
+
+            modelBuilder.Entity<ReceivedGoodsBy>()
+                .HasOne(rg => rg.Product)
+                .WithMany(p => p.GoodsReceived)
+                .HasForeignKey(rg => rg.ProductId);
 
             //seed roles
             SeedRolesData(modelBuilder);

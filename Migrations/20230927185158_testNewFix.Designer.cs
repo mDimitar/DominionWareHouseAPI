@@ -4,6 +4,7 @@ using DominionWarehouseAPI.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DominionWarehouseAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230927185158_testNewFix")]
+    partial class testNewFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -210,9 +213,9 @@ namespace DominionWarehouseAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasAlternateKey("UserId", "ProductId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("ProductId");
 
                     b.ToTable("ReceivedGoodsBy");
                 });
@@ -322,7 +325,7 @@ namespace DominionWarehouseAPI.Migrations
                         new
                         {
                             Id = 1,
-                            PasswordHash = "$2a$11$6sX4iHGj/i3yLHlK0DvPpeEbw.bV7BXQOA0q.SnZpvAu3GrCSSZ5G",
+                            PasswordHash = "$2a$11$dVkxVlkkzeU8SORB1aBTyeFn.hrKfpITSlI5uPDrU3pFuiPZ6gMa6",
                             RoleId = 2,
                             ShoppingCartId = 1,
                             Username = "dominionadmin"

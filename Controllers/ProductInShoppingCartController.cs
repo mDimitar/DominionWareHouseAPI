@@ -55,7 +55,7 @@ namespace DominionWarehouseAPI.Controllers
 
             if (response.Products.IsNullOrEmpty())
             {
-                return BadRequest(new { Success = false, Message = "No products have been found in your shopping cart." });
+                return NotFound(new { Success = false, Message = "No products have been found in your shopping cart." });
             }
 
             return Ok(response);

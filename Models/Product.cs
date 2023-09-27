@@ -36,5 +36,8 @@ namespace DominionWarehouseAPI.Models
         [JsonIgnore]
         public ICollection<OrderProduct> OrderProducts { get; set; }
 
+        [JsonIgnore]
+        public ICollection<ReceivedGoodsBy> GoodsReceived { get; set; } = new List<ReceivedGoodsBy>();
+
     }
 }

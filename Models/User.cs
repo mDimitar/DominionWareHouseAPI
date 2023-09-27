@@ -26,5 +26,8 @@ namespace DominionWarehouseAPI.Models
 
         public ICollection<Order> Orders { get; set; } = new List<Order>();
 
+        [JsonIgnore]
+        public ICollection<ReceivedGoodsBy> ReceivedGoods { get; set; } = new List<ReceivedGoodsBy>();
+
     }
 }

@@ -203,12 +203,12 @@ namespace DominionWarehouseAPI.Controllers
 
             var shoppingCartId = order.ShoppingCartId;
 
-            var prodsInSc = dbContext.ProductsInShoppingCarts.Include(p => p.Product).
-                Where(psc => psc.ShoppingCartId == shoppingCartId).ToList();
+            var prodsInOrd = dbContext.ProductsInOrder.Include(p => p.Product).
+                Where(order => order.OrderId == id).ToList();
 
            // var prodsInWarehouse = dbContext.Products.ToList();
 
-            foreach (var prod in prodsInSc)
+            foreach (var prod in prodsInOrd)
             {
                 var product = dbContext.ProductsInWarehouses.SingleOrDefault(p => p.Product.Id == prod.ProductId);
                 product.Quantity -= prod.Quantity;
@@ -246,9 +246,6 @@ namespace DominionWarehouseAPI.Controllers
 
             order.OrderStatus = OrderStatus.Canceled;
             order.Comment = "Canceled from buyer.";
-
-            //tbd: restore quantity when canceled.
-
 
             dbContext.SaveChanges();
 

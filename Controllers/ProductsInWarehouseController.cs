@@ -137,6 +137,8 @@ namespace DominionWarehouseAPI.Controllers
 
             string username = User.FindFirstValue(ClaimTypes.Name);
 
+            var user = dbContext.Users.FirstOrDefault(user => user.Username == username);
+
             var prodToBeAdded = 
                 dbContext.ProductsInWarehouses.FirstOrDefault(p => p.ProductId == request.ProductId);
 
@@ -150,14 +152,31 @@ namespace DominionWarehouseAPI.Controllers
                     Received = username,
                 };
                 dbContext.ProductsInWarehouses.Add(prodInWarehouse);
+                var recordOfReceivedGoods = new ReceivedGoodsBy
+                {
+                    UserId = user.Id,
+                    ProductId = (int)request.ProductId,
+                    ProductQuantity = (int)request.Quantity,
+                    AcceptanceDate = DateTime.UtcNow,
+                };
+                dbContext.ReceivedGoodsBy.Add(recordOfReceivedGoods);
                 dbContext.SaveChanges();
             }
             else
             {
                 prodToBeAdded.Quantity += (int)request.Quantity;
                 prodToBeAdded.Received = username;
+                var recordOfReceivedGoods = new ReceivedGoodsBy
+                {
+                    UserId = user.Id,
+                    ProductId = (int)request.ProductId,
+                    ProductQuantity = (int)request.Quantity,
+                    AcceptanceDate = DateTime.UtcNow,
+                };
+                dbContext.ReceivedGoodsBy.Add(recordOfReceivedGoods);
                 dbContext.SaveChanges();
             }
+
             return Ok(new {Success =  true, Message = "The product has been successfully added to the warehouse."});
         }
 

@@ -4,6 +4,7 @@ using DominionWarehouseAPI.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DominionWarehouseAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230927163939_AddedGoodsReceivedByEntity")]
+    partial class AddedGoodsReceivedByEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -190,29 +193,18 @@ namespace DominionWarehouseAPI.Migrations
 
             modelBuilder.Entity("DominionWarehouseAPI.Models.ReceivedGoodsBy", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("AcceptanceDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProductQuantity")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("AcceptanceDate")
+                        .HasColumnType("datetime2");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
+                    b.HasKey("UserId", "ProductId");
 
                     b.HasIndex("ProductId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("ReceivedGoodsBy");
                 });
@@ -322,7 +314,7 @@ namespace DominionWarehouseAPI.Migrations
                         new
                         {
                             Id = 1,
-                            PasswordHash = "$2a$11$6sX4iHGj/i3yLHlK0DvPpeEbw.bV7BXQOA0q.SnZpvAu3GrCSSZ5G",
+                            PasswordHash = "$2a$11$.5MTgDhsLBnYuWOa8AHCo.OVk35ZpoJOcFQY9EMkZ9vWQVt6rkUZC",
                             RoleId = 2,
                             ShoppingCartId = 1,
                             Username = "dominionadmin"
