@@ -30,6 +30,7 @@ namespace DominionWarehouseAPI.Controllers
                     Product = log.Product,
                     ProductQuantity = log.ProductQuantity,
                     User = log.User,
+                    ReceivedOn = log.AcceptanceDate.ToString("f"),
                 })
                 .ToList();
 
