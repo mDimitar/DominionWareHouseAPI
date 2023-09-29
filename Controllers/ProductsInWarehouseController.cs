@@ -23,20 +23,34 @@ namespace DominionWarehouseAPI.Controllers
             _configuration = configuration;
         }
 
-        [HttpGet("FilterProductsFromWarehouseByCategory/{id}")]
-        public async Task<IActionResult> FilterProductsByIncomingCategory(int id)
+        [HttpGet("FilterProductsFromWarehouseByCategory")]
+        public async Task<IActionResult> FilterProductsByIncomingCategory(int? id)
         {
+
+            if(id.Equals(null))
+            {
+                return BadRequest(new { Success = false, Message = "Please select a category." });
+            }
+
+            var category = dbContext.Categories.FirstOrDefault(p => p.Id == id);
+
+            if (category.Equals(null))
+            {
+                return BadRequest(new { Success = false, Message = "Category cannot be found." });
+            }
+
             var query = dbContext.ProductsInWarehouses
                 .Include(wp => wp.Product)
                 .Where(wp => wp.Product.Category.Id == id)
                 .Select(wp => new
                 {
-                    wp.Product.Id,
-                    wp.Product.ProductName,
-                    wp.Product.ProductDescription,
-                    wp.Product.Category.CategoryName,
-                    wp.Product.ProductPriceForSelling,
-                    wp.Product.ProductImageURL,
+                    Id = wp.ProductId,
+                    ProductName = wp.Product.ProductName,
+                    ProductDescription = wp.Product.ProductDescription,
+                    ProductPrice = wp.Product.ProductPriceForSelling,
+                    ProductImageUrl = wp.Product.ProductImageURL,
+                    ProductQuantity = wp.Quantity,
+                    ReceivedBy = wp.Received
                 });
 
             var products = await query.ToListAsync();

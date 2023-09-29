@@ -119,7 +119,7 @@ namespace DominionWarehouseAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CategoryId")
+                    b.Property<int?>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("ProductDescription")
@@ -322,7 +322,7 @@ namespace DominionWarehouseAPI.Migrations
                         new
                         {
                             Id = 1,
-                            PasswordHash = "$2a$11$KXFM8TiD.ovMyW6lOYCyqO7lRaI.ZvXvBakNtn0AEi9pRIUhIGxoO",
+                            PasswordHash = "$2a$11$IdppJi/gl3o8lKzYmLuaAOLdt9aUH2oq64K/f/tdNPQ61pb9ZqlOe",
                             RoleId = 2,
                             ShoppingCartId = 1,
                             Username = "dominionadmin"
@@ -398,8 +398,7 @@ namespace DominionWarehouseAPI.Migrations
                     b.HasOne("DominionWarehouseAPI.Models.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Category");
                 });

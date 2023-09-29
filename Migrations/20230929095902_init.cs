@@ -47,7 +47,7 @@ namespace DominionWarehouseAPI.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ProductName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ProductDescription = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    CategoryId = table.Column<int>(type: "int", nullable: false),
+                    CategoryId = table.Column<int>(type: "int", nullable: true),
                     ProductImageURL = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ProductPrice = table.Column<int>(type: "int", nullable: false),
                     ProductPriceForSelling = table.Column<int>(type: "int", nullable: false)
@@ -59,7 +59,8 @@ namespace DominionWarehouseAPI.Migrations
                         name: "FK_Products_Categories_CategoryId",
                         column: x => x.CategoryId,
                         principalTable: "Categories",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -81,6 +82,34 @@ namespace DominionWarehouseAPI.Migrations
                         name: "FK_Users_Roles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "Roles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ReceivedGoodsBy",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    ProductQuantity = table.Column<int>(type: "int", nullable: false),
+                    AcceptanceDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ReceivedGoodsBy", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ReceivedGoodsBy_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ReceivedGoodsBy_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -250,7 +279,7 @@ namespace DominionWarehouseAPI.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "PasswordHash", "RoleId", "ShoppingCartId", "Username", "WorksAtWarehouse" },
-                values: new object[] { 1, "$2a$11$w2JtjlJNeduprHSUQU2YNOiWJsKsi6s1dpPp.KJJO1yHTvPQ5DHha", 2, 1, "dominionadmin", null });
+                values: new object[] { 1, "$2a$11$IdppJi/gl3o8lKzYmLuaAOLdt9aUH2oq64K/f/tdNPQ61pb9ZqlOe", 2, 1, "dominionadmin", null });
 
             migrationBuilder.InsertData(
                 table: "ShoppingCart",
@@ -288,6 +317,16 @@ namespace DominionWarehouseAPI.Migrations
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ReceivedGoodsBy_ProductId",
+                table: "ReceivedGoodsBy",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReceivedGoodsBy_UserId",
+                table: "ReceivedGoodsBy",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ShoppingCart_UserId",
                 table: "ShoppingCart",
                 column: "UserId",
@@ -317,13 +356,16 @@ namespace DominionWarehouseAPI.Migrations
                 name: "ProductsInWarehouses");
 
             migrationBuilder.DropTable(
+                name: "ReceivedGoodsBy");
+
+            migrationBuilder.DropTable(
                 name: "Orders");
 
             migrationBuilder.DropTable(
-                name: "Products");
+                name: "Warehouse");
 
             migrationBuilder.DropTable(
-                name: "Warehouse");
+                name: "Products");
 
             migrationBuilder.DropTable(
                 name: "ShoppingCart");

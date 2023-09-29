@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DominionWarehouseAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20230927164457_AddedFieldQuantityInRGB")]
-    partial class AddedFieldQuantityInRGB
+    [Migration("20230929095902_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -122,7 +122,7 @@ namespace DominionWarehouseAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CategoryId")
+                    b.Property<int?>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("ProductDescription")
@@ -193,21 +193,29 @@ namespace DominionWarehouseAPI.Migrations
 
             modelBuilder.Entity("DominionWarehouseAPI.Models.ReceivedGoodsBy", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("AcceptanceDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
                     b.Property<int>("ProductQuantity")
                         .HasColumnType("int");
 
-                    b.HasKey("UserId", "ProductId");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("ReceivedGoodsBy");
                 });
@@ -317,7 +325,7 @@ namespace DominionWarehouseAPI.Migrations
                         new
                         {
                             Id = 1,
-                            PasswordHash = "$2a$11$yP33awnyWGBEFJirPNUsYOTCOK0zJD91gXTmNk4.V.RrwKN8kFzYW",
+                            PasswordHash = "$2a$11$IdppJi/gl3o8lKzYmLuaAOLdt9aUH2oq64K/f/tdNPQ61pb9ZqlOe",
                             RoleId = 2,
                             ShoppingCartId = 1,
                             Username = "dominionadmin"
@@ -393,8 +401,7 @@ namespace DominionWarehouseAPI.Migrations
                     b.HasOne("DominionWarehouseAPI.Models.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Category");
                 });
