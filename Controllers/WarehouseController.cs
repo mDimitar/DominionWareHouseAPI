@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 
 namespace DominionWarehouseAPI.Controllers
 {
@@ -31,11 +32,11 @@ namespace DominionWarehouseAPI.Controllers
 
             string username = User.FindFirstValue(ClaimTypes.Name);
 
-            var user = dbContext.Users.Include(r => r.Role).FirstOrDefault(u => u.Username == username);
+            var user = await dbContext.Users.Include(r => r.Role).FirstOrDefaultAsync(u => u.Username == username);
 
             if (user.Role.RoleName.Equals("ADMIN"))
             {
-                var allWarehouses = dbContext.Warehouse.Include(u => u.User).Include(pr => pr.WarehouseProducts).ToList();
+                var allWarehouses = await dbContext.Warehouse.Include(u => u.User).Include(pr => pr.WarehouseProducts).ToListAsync();
 
                 if (allWarehouses.IsNullOrEmpty())
                 {
@@ -57,20 +58,33 @@ namespace DominionWarehouseAPI.Controllers
 
         [HttpPost("RegisterWarehouse")]
         [Authorize(Roles = "OWNER,ADMIN")]
-        public ActionResult<Warehouse> RegisterWarehouse(WarehouseDTO warehouse)
+        public async Task<IActionResult> RegisterWarehouse(WarehouseDTO warehouse)
         {
-            var warehouses = dbContext.Warehouse.ToList();
+            var warehouses = await dbContext.Warehouse.ToListAsync();
 
-            if(warehouses.Count > 1)
+            if(warehouses.Count >= 1)
             {
                 return BadRequest(new { Success = false, Message = "You have already registered a warehouse." });
             }
 
-            var warehouseExists = dbContext.Warehouse.Any(w => w.Name == warehouse.Name);
-
-            if (warehouseExists)
+            if(!warehouse.Address.IsNullOrEmpty() || !warehouse.Name.IsNullOrEmpty())
             {
-                return BadRequest(new { Success = false, Message = "The warehouse already exists. Please enter a new name." });
+                if(!IsValidString(warehouse.Address) && !IsValidString(warehouse.Name))
+                {
+                    return BadRequest(new { Success = false, Message = "Invalid data." });
+                }
+                if (!IsValidString(warehouse.Address) && IsValidString(warehouse.Name))
+                {
+                    return BadRequest(new { Success = false, Message = "Invalid address." });
+                }
+                if (IsValidString(warehouse.Address) && !IsValidString(warehouse.Name))
+                {
+                    return BadRequest(new { Success = false, Message = "Invalid name." });
+                }
+            }
+            else
+            {
+                return BadRequest(new { Success = false, Message = "Invalid data." });
             }
 
             // Check if the user is authenticated and get their UserId
@@ -79,7 +93,7 @@ namespace DominionWarehouseAPI.Controllers
 
                 string username = User.FindFirstValue(ClaimTypes.Name);
 
-                var user = dbContext.Users.FirstOrDefault(u => u.Username == username);
+                var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
 
                 var newWarehouse = new Warehouse
                 {
@@ -89,10 +103,10 @@ namespace DominionWarehouseAPI.Controllers
                 };
 
                 dbContext.Warehouse.Add(newWarehouse);
-                dbContext.SaveChanges();
+                await dbContext.SaveChangesAsync(CancellationToken.None);
 
                 user.WorksAtWarehouse = newWarehouse.Id;
-                dbContext.SaveChanges();
+                await dbContext.SaveChangesAsync(CancellationToken.None);
 
                 return Ok(new {Success = true, Message = "The warehouse has been successfully registered." });
             }
@@ -101,43 +115,17 @@ namespace DominionWarehouseAPI.Controllers
                 return BadRequest(new {Success = false, Message = "You must be logged in to register a warehouse." });
             }
         }
-
-        [HttpPut("EditWarehouse/{id}")]
-        [Authorize(Roles = "OWNER,ADMIN")]
-        public IActionResult EditWarehouse(int id, [FromBody] WarehouseDTO updatedWarehouseDTO)
+        static bool IsValidString(string input)
         {
-            var existingWarehouse = dbContext.Warehouse.Include(w => w.User).FirstOrDefault(w => w.Id == id);
+            string validPattern = "^[a-zA-Z0-9!@#$%^&*]+( [a-zA-Z0-9!@#$%^&*]+)*$";
 
-            if (existingWarehouse == null)
+            if (input.IsNullOrEmpty())
             {
-                return BadRequest(new {Success = false, Message = "The warehouse you are trying to edit cannot be found." });
+                return true;
             }
 
-            existingWarehouse.Name = updatedWarehouseDTO.Name;
-            existingWarehouse.Address = updatedWarehouseDTO.Address;
-
-            dbContext.SaveChanges();
-
-            return Ok(new {Success = true, Message = "The changes has been successfully registered." });
+            return Regex.IsMatch(input, validPattern) && !string.IsNullOrWhiteSpace(input);
         }
-
-        /*[HttpDelete("DeleteWarehouse/{id}")]
-        [Authorize(Roles = "OWNER,ADMIN")]
-        public IActionResult DeleteWarehouse(int id)
-        {
-            var warehouse = dbContext.Warehouse.FirstOrDefault(w => w.Id == id);
-            
-            if(warehouse == null)
-            {
-                return BadRequest(new {Success = false, Message = "The warehouse you are trying to delete cannot be found." });
-            }
-
-            dbContext.Remove(warehouse);
-
-            dbContext.SaveChanges();
-
-            return Ok(new {Success = true, Message = "The changes has been successfully deleted." });
-        }*/
 
     }
 }

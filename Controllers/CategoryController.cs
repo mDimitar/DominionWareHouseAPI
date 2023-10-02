@@ -4,6 +4,7 @@ using DominionWarehouseAPI.Models.Data_Transfer_Objects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text.RegularExpressions;
 
@@ -25,10 +26,10 @@ namespace DominionWarehouseAPI.Controllers
         }
 
         [HttpGet("Categories")]
-        public IActionResult GetAllCategories()
+        public async Task<IActionResult> GetAllCategories()
         {
 
-            var categories = dbContext.Categories.ToList();
+            var categories = await dbContext.Categories.ToListAsync();
 
             if (categories.IsNullOrEmpty())
             {
@@ -41,7 +42,7 @@ namespace DominionWarehouseAPI.Controllers
 
         [HttpPost("RegisterCategory")]
         [Authorize(Roles = "ADMIN,OWNER,EMPLOYEE")]
-        public IActionResult RegisterCategory(CategoryDTO request)
+        public async Task<IActionResult> RegisterCategory(CategoryDTO request)
         {
 
             if(!IsValidString(request.CategoryName))
@@ -49,7 +50,7 @@ namespace DominionWarehouseAPI.Controllers
                 return BadRequest(new { Success = false, Message = "Invalid Category name." });
             }
 
-            var category = dbContext.Categories.FirstOrDefault(c => c.CategoryName == request.CategoryName);
+            var category = await dbContext.Categories.FirstOrDefaultAsync(c => c.CategoryName == request.CategoryName);
 
             if (category != null)
             {
@@ -62,14 +63,14 @@ namespace DominionWarehouseAPI.Controllers
             };
 
             dbContext.Categories.Add(newCategory);
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync(CancellationToken.None);
 
             return Ok(new { Success = true, Message = "The category has been registered successfully." });
         }
 
         [HttpPut("EditCategory/{id}")]
         [Authorize(Roles = "ADMIN,OWNER,EMPLOYEE")]
-        public IActionResult EditCategory(int id, [FromBody] CategoryDTO request)
+        public async Task<IActionResult> EditCategory(int id, [FromBody] CategoryDTO request)
         {
 
             if (!IsValidString(request.CategoryName))
@@ -77,7 +78,7 @@ namespace DominionWarehouseAPI.Controllers
                 return BadRequest(new { Success = false, Message = "Invalid category name." });
             }
 
-            var category = dbContext.Categories.FirstOrDefault(c => c.Id == id);
+            var category = await dbContext.Categories.FirstOrDefaultAsync(c => c.Id == id);
 
             if (category == null)
             {
@@ -86,16 +87,16 @@ namespace DominionWarehouseAPI.Controllers
 
             category.CategoryName = request.CategoryName;
 
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync(CancellationToken.None);
 
             return Ok(new { Success = true, Message = "The changes have been registered successfully." });
         }
 
         [HttpDelete("DeleteCategory/{id}")]
         [Authorize(Roles = "ADMIN,OWNER,EMPLOYEE")]
-        public IActionResult DeleteCategory(int id)
+        public async Task<IActionResult> DeleteCategory(int id)
         {
-            var category = dbContext.Categories.FirstOrDefault(c => c.Id == id);
+            var category = await dbContext.Categories.FirstOrDefaultAsync(c => c.Id == id);
 
             if (category == null)
             {
@@ -103,7 +104,7 @@ namespace DominionWarehouseAPI.Controllers
             }
 
             dbContext.Categories.Remove(category);
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync(CancellationToken.None);
 
             return Ok(new { Success = true, Message = "The category has been deleted successfully." });
         }

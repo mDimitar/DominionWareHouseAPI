@@ -22,9 +22,9 @@ namespace DominionWarehouseAPI.Controllers
         }
 
         [HttpGet("ViewReceivedGoods")]
-        public IActionResult ViewReceivedGoods()
+        public async Task<IActionResult> ViewReceivedGoods()
         {
-            var log = dbContext.ReceivedGoodsBy.Include(p => p.Product).Include(u => u.User)
+            var log = await dbContext.ReceivedGoodsBy.Include(p => p.Product).Include(u => u.User)
                 .Select(log => new
                 {
                     Product = log.Product,
@@ -32,7 +32,7 @@ namespace DominionWarehouseAPI.Controllers
                     User = log.User,
                     ReceivedOn = log.AcceptanceDate.ToString("f"),
                 })
-                .ToList();
+                .ToListAsync();
 
             return Ok(log);
         }

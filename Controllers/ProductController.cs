@@ -35,7 +35,7 @@ namespace DominionWarehouseAPI.Controllers
                 ReferenceHandler = ReferenceHandler.Preserve
             };
 
-            var products = dbContext.Products.Include(cat => cat.Category).ToList();
+            var products = await dbContext.Products.Include(cat => cat.Category).ToListAsync();
 
             if (products.IsNullOrEmpty())
             {
@@ -46,9 +46,9 @@ namespace DominionWarehouseAPI.Controllers
         }
 
         [HttpPost("RegisterProduct")]
-        public ActionResult<Product> RegisterProduct(ProductDTO request)
+        public async Task<IActionResult> RegisterProduct(ProductDTO request)
         {
-            var product = dbContext.Products.Any(p => p.ProductName == request.ProductName);
+            var product = await dbContext.Products.AnyAsync(p => p.ProductName == request.ProductName);
 
             if(request.ProductName.IsNullOrEmpty() || request.ProductDescription.IsNullOrEmpty()
                 || request.CategoryId.Equals(null) || request.ProductPrice.Equals(null)
@@ -73,16 +73,16 @@ namespace DominionWarehouseAPI.Controllers
             };
 
             dbContext.Products.Add(newProduct);
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync(CancellationToken.None);
 
             return Ok(new { Success = true, Message = "The product has been successfully registered." });
         }
 
 
         [HttpPut("EditProduct/{id}")]
-        public ActionResult<Product> EditProducts(int id,[FromBody] ProductDTO request)
+        public async Task<IActionResult> EditProducts(int id,[FromBody] ProductDTO request)
         {
-            var product = dbContext.Products.Any(p => p.Id == id);
+            var product = await dbContext.Products.AnyAsync(p => p.Id == id);
 
             if(request.ProductName.IsNullOrEmpty() && request.ProductDescription.IsNullOrEmpty() &&
                 request.CategoryId.Equals(null) && request.ProductPrice.Equals(null) &&
@@ -121,7 +121,7 @@ namespace DominionWarehouseAPI.Controllers
                 return BadRequest(new { Success = false, Message = "Invalid product image URL" });
             }
 
-            var productToBeEdited = dbContext.Products.SingleOrDefault(p => p.Id == id);
+            var productToBeEdited = await dbContext.Products.SingleOrDefaultAsync(p => p.Id == id);
 
             productToBeEdited.ProductName = request.ProductName.IsNullOrEmpty() ? productToBeEdited.ProductName : request.ProductName;
             productToBeEdited.ProductDescription = request.ProductDescription.IsNullOrEmpty() ? productToBeEdited.ProductDescription : request.ProductDescription; 
@@ -130,15 +130,15 @@ namespace DominionWarehouseAPI.Controllers
             productToBeEdited.ProductImageURL = request.ImageURL.IsNullOrEmpty() ? productToBeEdited.ProductImageURL : request.ImageURL;
             productToBeEdited.ProductPriceForSelling = request.ProductPriceForSelling.Equals(null) ? productToBeEdited.ProductPriceForSelling : (int)request.ProductPriceForSelling;
 
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync(CancellationToken.None);
 
             return Ok(new { Success = true, Message = "The changes has been successfully registered." });
         }
 
         [HttpDelete("DeleteProduct/{id}")]
-        public ActionResult<Product> DeleteProduct(int id)
+        public async Task<IActionResult> DeleteProduct(int id)
         {
-            var product = dbContext.Products.FirstOrDefault(p => p.Id==id);
+            var product = await dbContext.Products.FirstOrDefaultAsync(p => p.Id==id);
 
             if (product == null)
             {
@@ -146,7 +146,7 @@ namespace DominionWarehouseAPI.Controllers
             }
 
             dbContext.Products.Remove(product);
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync(CancellationToken.None);
 
             return Ok(new { Success = true, Message = "The product has been successfully deleted." });
         }

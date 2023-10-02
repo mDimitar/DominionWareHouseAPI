@@ -25,12 +25,12 @@ namespace DominionWarehouseAPI.Controllers
         }
 
         [HttpGet("GetAllProductsInShoppingCart")]
-        public IActionResult GetAllProductsInShoppingCart()
+        public async Task<IActionResult> GetAllProductsInShoppingCart()
         {
 
             string username = User.FindFirstValue(ClaimTypes.Name);
 
-            var user = dbContext.Users.Include(sc => sc.ShoppingCart).FirstOrDefault(u => u.Username == username);
+            var user = await dbContext.Users.Include(sc => sc.ShoppingCart).FirstOrDefaultAsync(u => u.Username == username);
 
             var query = from psc in dbContext.ProductsInShoppingCarts
                         .Where(sc => sc.ShoppingCartId == user.ShoppingCartId)
@@ -46,9 +46,11 @@ namespace DominionWarehouseAPI.Controllers
                             Quantity = psc.Quantity
                         };
 
+            var products = await query.ToListAsync();
+
             var response = new
             {
-                Products = query,
+                Products = products,
                 TotalPrice = user.ShoppingCart.TotalPrice,
                 Quantity = query.Count(),
             };
@@ -84,7 +86,7 @@ namespace DominionWarehouseAPI.Controllers
                 }
 
                 string username = User.FindFirstValue(ClaimTypes.Name);
-                var user = dbContext.Users.FirstOrDefault(u => u.Username==username);
+                var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
                 
                 int userId = user.Id; 
 
@@ -115,7 +117,7 @@ namespace DominionWarehouseAPI.Controllers
                     shoppingCart.TotalPrice += productToBeAdded.Quantity * product.Product.ProductPriceForSelling;
                 }
 
-                await dbContext.SaveChangesAsync();
+                await dbContext.SaveChangesAsync(CancellationToken.None);
 
                 return Ok(new {Success = true, Message = "Product has been added successfully to the shopping cart." });
             }
@@ -130,7 +132,7 @@ namespace DominionWarehouseAPI.Controllers
         {
 
             string username = User.FindFirstValue(ClaimTypes.Name);
-            var user = dbContext.Users.Include(u => u.ShoppingCart).FirstOrDefault(u => u.Username == username);
+            var user = await dbContext.Users.Include(u => u.ShoppingCart).FirstOrDefaultAsync(u => u.Username == username);
 
             if (user == null)
             {
@@ -145,7 +147,7 @@ namespace DominionWarehouseAPI.Controllers
 
             dbContext.ProductsInShoppingCarts.Remove(userProdsInSc);
             user.ShoppingCart.TotalPrice -= userProdsInSc.Product.ProductPriceForSelling * userProdsInSc.Quantity;
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync(CancellationToken.None);
 
             return Ok(new { Success = true, Message = "Product has been deleted successfully from the shopping cart." });
         }

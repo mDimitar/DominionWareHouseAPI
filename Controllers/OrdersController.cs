@@ -27,13 +27,13 @@ namespace DominionWarehouseAPI.Controllers
 
         [HttpGet("GetAllOrdersForBuyer")]
         [Authorize(Roles = "BUYER,ADMIN,OWNER,EMPLOYEE")]
-        public IActionResult GetAllOrdersForBuyer()
+        public async Task<IActionResult> GetAllOrdersForBuyer()
         {
             string username = User.FindFirstValue(ClaimTypes.Name);
 
-            var user = dbContext.Users.FirstOrDefault(u => u.Username == username);
+            var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Username == username);
 
-            var orders = dbContext.Orders
+            var orders = await dbContext.Orders
                 .Include(o => o.OrderProducts)
                 .Select(order => new
                 {
@@ -43,13 +43,14 @@ namespace DominionWarehouseAPI.Controllers
                     Comment = order.Comment,
                     OrderStatus = order.OrderStatus,
                     ShoppingCartId = order.ShoppingCartId,
+                    Address = order.DeliveryAddress,
                     soldFromWarehouseId = order.soldFromWarehouseId,
                     soldFromEmployeeId = order.soldFromEmployeeId,
                     DateCreated = order.DateCreated.ToString("f"),
                     PhoneNumber = order.PhoneNumber,
                     CommentFromEmployee = order.CommentFromEmployee,
                 })
-                .Where(o => o.UserId == user.Id).ToList();
+                .Where(o => o.UserId == user.Id).ToListAsync();
            
 
             if (orders.IsNullOrEmpty())
@@ -63,9 +64,9 @@ namespace DominionWarehouseAPI.Controllers
 
         [HttpGet("GetAllOrders")]
         [Authorize(Roles = "ADMIN,EMPLOYEE,OWNER")]
-        public IActionResult GetAllOrders()
+        public async Task<IActionResult> GetAllOrders()
         {
-            var orders = dbContext.Orders
+            var orders = await dbContext.Orders
                 .Select(order => new
                 {
                     Id = order.Id,
@@ -83,11 +84,12 @@ namespace DominionWarehouseAPI.Controllers
                     {
                         ProductId = op.ProductId,
                         Quantity = op.Quantity,
+                        ProductImage = op.Product.ProductImageURL,
                         ProductName = op.Product.ProductName,
                         ProductDescription = op.Product.ProductDescription,
                     }).ToList(),
                 })
-                .ToList();
+                .ToListAsync();
 
             if (orders.IsNullOrEmpty())
             {
@@ -99,21 +101,21 @@ namespace DominionWarehouseAPI.Controllers
 
         [HttpPost("CreateOrder")]
         [Authorize(Roles = "BUYER,OWNER,EMPLOYEE,ADMIN")]
-        public IActionResult CreateOrder(OrderDTO request)
+        public async Task<IActionResult> CreateOrder(OrderDTO request)
         {
             string username = User.FindFirstValue(ClaimTypes.Name);
 
-            var user = dbContext.Users.Include(u => u.ShoppingCart).FirstOrDefault(u => u.Username == username);
+            var user = await dbContext.Users.Include(u => u.ShoppingCart).FirstOrDefaultAsync(u => u.Username == username);
 
-            var prodsInShoppingCart = dbContext.ProductsInShoppingCarts
-                 .Where(sc => sc.ShoppingCartId == user.ShoppingCartId).ToList();
+            var prodsInShoppingCart = await dbContext.ProductsInShoppingCarts
+                 .Where(sc => sc.ShoppingCartId == user.ShoppingCartId).ToListAsync();
 
             if (prodsInShoppingCart.IsNullOrEmpty())
             {
                 return BadRequest(new { Success = false, Message = "There are no products in the shopping cart." });
             }
 
-            var wh = dbContext.Warehouse.First();
+            var wh = await dbContext.Warehouse.FirstAsync();
 
             if (request.PhoneNumber.IsNullOrEmpty() || request.DeliveryAddress.IsNullOrEmpty())
             {
@@ -134,8 +136,8 @@ namespace DominionWarehouseAPI.Controllers
             };
 
             dbContext.Orders.Add(neworder);
-            dbContext.SaveChanges();
 
+           await dbContext.SaveChangesAsync(CancellationToken.None);
 
             foreach (var product in prodsInShoppingCart)
             {
@@ -146,17 +148,16 @@ namespace DominionWarehouseAPI.Controllers
                     Quantity = product.Quantity,
                 };
                 dbContext.ProductsInOrder.Add(prodInOrder);
-                dbContext.SaveChanges();
+               await dbContext.SaveChangesAsync(CancellationToken.None);
             }
 
+            await dbContext.SaveChangesAsync(CancellationToken.None);
 
-            dbContext.SaveChanges();
-
-            var rectToDelete = dbContext.ProductsInShoppingCarts.Where(sc => sc.ShoppingCartId == user.ShoppingCartId).ToList();
+            var rectToDelete = await dbContext.ProductsInShoppingCarts.Where(sc => sc.ShoppingCartId == user.ShoppingCartId).ToListAsync();
 
             dbContext.ProductsInShoppingCarts.RemoveRange(rectToDelete);
             user.ShoppingCart.TotalPrice = 0;
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync(CancellationToken.None);
 
             return Ok(new { Success = true, Message = "The order has been created succesfully." });
         }
@@ -165,7 +166,7 @@ namespace DominionWarehouseAPI.Controllers
         [Authorize]
         public async Task<IActionResult> EditOrder(int id, OrderEditDTO request)
         {
-            var order = dbContext.Orders.FirstOrDefault(o => o.Id == id);
+            var order = await dbContext.Orders.FirstOrDefaultAsync(o => o.Id == id);
 
             if(order == null)
             {
@@ -180,7 +181,7 @@ namespace DominionWarehouseAPI.Controllers
             order.PhoneNumber = request.PhoneNumber.IsNullOrEmpty() ? order.PhoneNumber : request.PhoneNumber;
             order.Comment = request.Comment.IsNullOrEmpty() ? order.Comment : request.Comment;
 
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync(CancellationToken.None);
 
             return Ok(new { Success = true, Message = "The changes have been succesfully registered." });
 
@@ -192,9 +193,9 @@ namespace DominionWarehouseAPI.Controllers
         {
             string username = User.FindFirstValue(ClaimTypes.Name);
 
-            var user = dbContext.Users.Include(u => u.ShoppingCart).FirstOrDefault(u => u.Username == username);
+            var user = await dbContext.Users.Include(u => u.ShoppingCart).FirstOrDefaultAsync(u => u.Username == username);
 
-            var order = dbContext.Orders.SingleOrDefault(o => o.Id == id);
+            var order = await dbContext.Orders.SingleOrDefaultAsync(o => o.Id == id);
 
             if (order == null)
             {
@@ -203,21 +204,19 @@ namespace DominionWarehouseAPI.Controllers
 
             var shoppingCartId = order.ShoppingCartId;
 
-            var prodsInOrd = dbContext.ProductsInOrder.Include(p => p.Product).
-                Where(order => order.OrderId == id).ToList();
-
-           // var prodsInWarehouse = dbContext.Products.ToList();
+            var prodsInOrd = await dbContext.ProductsInOrder.Include(p => p.Product).
+                Where(order => order.OrderId == id).ToListAsync();
 
             foreach (var prod in prodsInOrd)
             {
-                var product = dbContext.ProductsInWarehouses.SingleOrDefault(p => p.Product.Id == prod.ProductId);
+                var product = await dbContext.ProductsInWarehouses.SingleOrDefaultAsync(p => p.Product.Id == prod.ProductId);
                 product.Quantity -= prod.Quantity;
-                dbContext.SaveChanges();
+                await dbContext.SaveChangesAsync(CancellationToken.None);
             }
 
             order.OrderStatus = OrderStatus.Delivered;
             order.soldFromEmployeeId = user.Id;
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync(CancellationToken.None);
 
             return Ok(new {Success = true, Message = "The order has been finalized."});
         }
@@ -229,9 +228,9 @@ namespace DominionWarehouseAPI.Controllers
 
             string username = User.FindFirstValue(ClaimTypes.Name);
 
-            var user = dbContext.Users.Include(u => u.Role).FirstOrDefault(u => u.Username == username);
+            var user = await dbContext.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Username == username);
 
-            var order = dbContext.Orders.FirstOrDefault(o => o.Id == id);
+            var order = await dbContext.Orders.FirstOrDefaultAsync(o => o.Id == id);
 
             if(order == null)
             {
@@ -247,7 +246,7 @@ namespace DominionWarehouseAPI.Controllers
             order.OrderStatus = OrderStatus.Canceled;
             order.Comment = "Canceled from buyer.";
 
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync(CancellationToken.None);
 
             return Ok(new { Success = true, Message = "The order has been canceled." });
         }

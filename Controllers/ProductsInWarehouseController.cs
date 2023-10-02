@@ -32,7 +32,7 @@ namespace DominionWarehouseAPI.Controllers
                 return BadRequest(new { Success = false, Message = "Please select a category." });
             }
 
-            var category = dbContext.Categories.FirstOrDefault(p => p.Id == id);
+            var category = await dbContext.Categories.FirstOrDefaultAsync(p => p.Id == id);
 
             if (category.Equals(null))
             {
@@ -75,7 +75,9 @@ namespace DominionWarehouseAPI.Controllers
                     ProductQuantity = wp.Quantity,
                     ReceivedBy = wp.Received
                 });
-                return Ok(nonfiltered);
+
+                var nonfilteredProds = await nonfiltered.ToListAsync();
+                return Ok(nonfilteredProds);
             }
 
             var query = dbContext.ProductsInWarehouses
@@ -97,17 +99,17 @@ namespace DominionWarehouseAPI.Controllers
         }
 
         [HttpGet("GetProductsFromWarehouse")]
-        public IActionResult GetAllProductsFromWarehouse()
+        public async Task<IActionResult> GetAllProductsFromWarehouse()
         {
 
-            var wh = dbContext.Warehouse.FirstOrDefault();
+            var wh = await dbContext.Warehouse.FirstOrDefaultAsync();
 
             if(wh == null)
             {
                 return BadRequest(new { Success = false, Message = "No warehouse found in the database." });
             }
 
-            var prodsinwh = dbContext.ProductsInWarehouses.
+            var prodsinwh = await dbContext.ProductsInWarehouses.
                 Where(piw => piw.WarehouseId == wh.Id && piw.Quantity > 0).
                 Include(piw => piw.Product).
                 Select(p => new
@@ -119,7 +121,7 @@ namespace DominionWarehouseAPI.Controllers
                     ProductImageUrl = p.Product.ProductImageURL,
                     ProductQuantity = p.Quantity,
                     ReceivedBy = p.Received
-                }).ToList();
+                }).ToListAsync();
 
             if(!prodsinwh.Any())
             {
@@ -131,7 +133,7 @@ namespace DominionWarehouseAPI.Controllers
 
         [HttpPost("AddProductToWareHouse")]
         [Authorize(Roles = "ADMIN,OWNER,EMPLOYEE")]
-        public IActionResult AddProductToWareHouse(ProductWareHouseDTO request)
+        public async Task<IActionResult> AddProductToWareHouse(ProductWareHouseDTO request)
         {
 
             if ((request.Quantity.Equals(null) || request.Quantity <= 0) && request.WarehouseId.Equals(null))
@@ -151,10 +153,9 @@ namespace DominionWarehouseAPI.Controllers
 
             string username = User.FindFirstValue(ClaimTypes.Name);
 
-            var user = dbContext.Users.FirstOrDefault(user => user.Username == username);
+            var user = await dbContext.Users.FirstOrDefaultAsync(user => user.Username == username);
 
-            var prodToBeAdded = 
-                dbContext.ProductsInWarehouses.FirstOrDefault(p => p.ProductId == request.ProductId);
+            var prodToBeAdded = await dbContext.ProductsInWarehouses.FirstOrDefaultAsync(p => p.ProductId == request.ProductId);
 
             if (prodToBeAdded == null)
             {
@@ -174,7 +175,7 @@ namespace DominionWarehouseAPI.Controllers
                     AcceptanceDate = DateTime.UtcNow,
                 };
                 dbContext.ReceivedGoodsBy.Add(recordOfReceivedGoods);
-                dbContext.SaveChanges();
+                await dbContext.SaveChangesAsync(CancellationToken.None);
             }
             else
             {
@@ -188,7 +189,7 @@ namespace DominionWarehouseAPI.Controllers
                     AcceptanceDate = DateTime.UtcNow,
                 };
                 dbContext.ReceivedGoodsBy.Add(recordOfReceivedGoods);
-                dbContext.SaveChanges();
+                await dbContext.SaveChangesAsync(CancellationToken.None);
             }
 
             return Ok(new {Success =  true, Message = "The product has been successfully added to the warehouse."});
@@ -196,9 +197,9 @@ namespace DominionWarehouseAPI.Controllers
 
         [HttpDelete("DeleteProductFromWarehouse/{productId}")]
         [Authorize(Roles = "ADMIN,OWNER,EMPLOYEE")]
-        public IActionResult RemoveProductFromWarehouse(int productId)
+        public async Task<IActionResult> RemoveProductFromWarehouse(int productId)
         {
-            var productToBeDeleted = dbContext.ProductsInWarehouses.FirstOrDefault(p => p.ProductId.Equals(productId));
+            var productToBeDeleted = await dbContext.ProductsInWarehouses.FirstOrDefaultAsync(p => p.ProductId.Equals(productId));
 
             if (productToBeDeleted.Equals(null))
             {
@@ -206,7 +207,7 @@ namespace DominionWarehouseAPI.Controllers
             }
 
             dbContext.Remove(productToBeDeleted); 
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync(CancellationToken.None);
 
             return Ok(new { Success = true, Message = "The product has been successfully removed from the warehouse." });
         }

@@ -27,25 +27,26 @@ namespace DominionWarehouseAPI.Controllers
         }
 
         [HttpGet("GetAllFinishedOrders")]
-        public async Task<IActionResult> GetAllFinishedOrders()
+        public async Task<IActionResult> GetAllFinishedOrdersCount()
         {
 
-            var orders = dbContext.Orders.Where(order => order.OrderStatus == OrderStatus.Delivered)
+            var orders = await dbContext.Orders.Where(order => order.OrderStatus == OrderStatus.Delivered)
                 .Select(order => new
                 {
                     Id = order.Id,
                     User = order.User.Username,
                     TotalSum = order.TotalSum,
                     Comment = order.Comment,
-                    Date = order.DateCreated.ToString("M/d/yyyy h:mm:ss tt"),
+                    Date = order.DateCreated.ToString("f"),
                     SoldFromEmployee = dbContext.Users.FirstOrDefault(u => u.Id == order.soldFromEmployeeId).Username
-                }).ToList();
+                }).ToListAsync();
 
             if(orders.IsNullOrEmpty())
             {
                 return BadRequest( new { Success = false, Message = "No orders have been found in the database" } );
             }
-            return Ok(orders);
+
+            return Ok(new { FinishedOrdersCount = orders.Count() });
         }
 
 
@@ -58,7 +59,7 @@ namespace DominionWarehouseAPI.Controllers
 
             endDateTime = endDateTime.AddDays(1);
 
-            var orders = dbContext.Orders
+            var orders = await dbContext.Orders
                 .Where(order => order.OrderStatus == OrderStatus.Delivered)
                 .Where(order => order.DateCreated >= startDateTime && order.DateCreated < endDateTime)
                 .Select(order => new
@@ -69,7 +70,7 @@ namespace DominionWarehouseAPI.Controllers
                     Comment = order.Comment,
                     Date = order.DateCreated.ToString("M/d/yyyy h:mm:ss tt"),
                     SoldFromEmployee = dbContext.Users.FirstOrDefault(u => u.Id == order.soldFromEmployeeId).Username
-                }).ToList();
+                }).ToListAsync();
 
             if (orders.IsNullOrEmpty())
             {
@@ -87,7 +88,7 @@ namespace DominionWarehouseAPI.Controllers
 
             endDateTime = endDateTime.AddDays(1);
 
-            var orders = dbContext.Orders
+            var orders = await dbContext.Orders
                 .Include(pio => pio.OrderProducts)
                 .Where(order => order.OrderStatus == OrderStatus.Delivered)
                 .Where(order => order.DateCreated >= startDateTime && order.DateCreated < endDateTime)
@@ -99,7 +100,7 @@ namespace DominionWarehouseAPI.Controllers
                     Comment = order.Comment,
                     Date = order.DateCreated.ToString("M/d/yyyy h:mm:ss tt"),
                     SoldFromEmployee = dbContext.Users.FirstOrDefault(u => u.Id == order.soldFromEmployeeId).Username
-                }).ToList();
+                }).ToListAsync();
 
             if (orders.IsNullOrEmpty())
             {
@@ -110,7 +111,7 @@ namespace DominionWarehouseAPI.Controllers
 
             foreach (var order in orders)
             {
-                var prodsInOrder = dbContext.ProductsInOrder.Include(p => p.Product).Where(pio => pio.OrderId == order.Id).ToList();
+                var prodsInOrder = await dbContext.ProductsInOrder.Include(p => p.Product).Where(pio => pio.OrderId == order.Id).ToListAsync();
 
                 foreach (var prods in prodsInOrder)
                 {

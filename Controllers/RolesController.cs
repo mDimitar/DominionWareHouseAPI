@@ -25,7 +25,7 @@ namespace DominionWarehouseAPI.Controllers
         [HttpGet("Roles")]
         public async Task<ActionResult<Warehouse>> GetAllRoles()
         {
-            var roles = dbContext.Roles.ToList();
+            var roles = await dbContext.Roles.ToListAsync();
 
             if(roles.IsNullOrEmpty())
             {
@@ -37,9 +37,9 @@ namespace DominionWarehouseAPI.Controllers
 
         [HttpPost("AddRole")]
         [Authorize(Roles = "ADMIN")]
-        public ActionResult<Roles> RegisterRole(RoleDTO role)
+        public async Task<IActionResult> RegisterRole(RoleDTO role)
         {
-            var existingRole = dbContext.Roles.Any(w => w.RoleName == role.RoleName);
+            var existingRole = await dbContext.Roles.AnyAsync(w => w.RoleName == role.RoleName);
 
             if(existingRole)
             {
@@ -57,7 +57,7 @@ namespace DominionWarehouseAPI.Controllers
             };
 
             dbContext.Roles.Add(newRole);
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync(CancellationToken.None);
 
             return Ok(new { Success = true, Message = "The role has been added successfully." });
         }

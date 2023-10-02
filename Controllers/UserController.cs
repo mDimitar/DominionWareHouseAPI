@@ -28,9 +28,9 @@ namespace DominionWarehouseAPI.Controllers
 
         [HttpGet("AllUsers")]
         [Authorize(Roles = "ADMIN")]
-        public ActionResult<User> GetAllUsers()
+        public async Task<IActionResult> GetAllUsers()
         {
-            var users = dbContext.Users
+            var users = await dbContext.Users
             .Include(user => user.Role)
             .Select(user => new
             {
@@ -38,7 +38,7 @@ namespace DominionWarehouseAPI.Controllers
                 user.Username,
                 WorksAtWarehouse = dbContext.Warehouse.Where(wh => wh.Id == user.WorksAtWarehouse).FirstOrDefault().Name,
                 RoleName = user.Role.RoleName
-            }).ToList();
+            }).ToListAsync();
 
             if (users.IsNullOrEmpty())
             {
@@ -49,7 +49,7 @@ namespace DominionWarehouseAPI.Controllers
 
 
         [HttpPost("Register")]
-        public ActionResult<User> Register(UserDTOforRegistering request)
+        public async Task<IActionResult> Register(UserDTOforRegistering request)
         {
 
             if(request.Username.IsNullOrEmpty() || request.Password.IsNullOrEmpty() || request.RoleId.Equals(null))
@@ -57,7 +57,7 @@ namespace DominionWarehouseAPI.Controllers
                 return BadRequest(new { Success = false, Message = "Username,Password and Role are required fields." });
             }
 
-            var userExists = dbContext.Users.Any(user => user.Username == request.Username);
+            var userExists = await dbContext.Users.AnyAsync(user => user.Username == request.Username);
 
             if (userExists)
             {
@@ -80,13 +80,13 @@ namespace DominionWarehouseAPI.Controllers
             };
 
             dbContext.Users.Add(newUser);
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync(CancellationToken.None);
 
             return Ok(new { Success = true, Message = "The user has been successfully registered." });
         }
 
         [HttpPost("Login")]
-        public ActionResult<User> Login(UserDTOforLogin request)
+        public async Task<IActionResult> Login(UserDTOforLogin request)
         {
 
             if (request.Username.IsNullOrEmpty() || request.Password.IsNullOrEmpty())
@@ -94,14 +94,14 @@ namespace DominionWarehouseAPI.Controllers
                 return BadRequest(new { Success = false, Message = "Both fields are required." });
             }
 
-            var userExists = dbContext.Users.Any(user => user.Username == request.Username);
+            var userExists = await dbContext.Users.AnyAsync(user => user.Username == request.Username);
 
             if (!userExists)
             {
                 return BadRequest(new { Success = false, Message = "The requested user cannot be found." });
             }
 
-            var user = dbContext.Users.Include(u => u.Role).FirstOrDefault(user => user.Username == request.Username);
+            var user = await dbContext.Users.Include(u => u.Role).FirstOrDefaultAsync(user => user.Username == request.Username);
 
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             {
@@ -137,13 +137,11 @@ namespace DominionWarehouseAPI.Controllers
 
         }
 
-        //edit user
-
         [HttpPut("EditUser/{id}")]
         [Authorize(Roles = "ADMIN,OWNER")]
-        public IActionResult EditUser(int id, [FromBody] UserDTOForEdit userDTO)
+        public async Task<IActionResult> EditUser(int id, [FromBody] UserDTOForEdit userDTO)
         {
-            var user = dbContext.Users.FirstOrDefault(u => u.Id == id);
+            var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
 
             if (!IsValidString(userDTO.Password) && !IsValidString(userDTO.Username))
             {
@@ -170,7 +168,7 @@ namespace DominionWarehouseAPI.Controllers
             user.WorksAtWarehouse = userDTO.WorksAtWarehouse;
             user.RoleId = userDTO.RoleId  == null ? user.RoleId : userDTO.RoleId;
 
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync(CancellationToken.None);
 
             return Ok(new { Success = true, Message = "The user data has been successfully updated." });
         }
@@ -180,7 +178,7 @@ namespace DominionWarehouseAPI.Controllers
 
         [HttpDelete("DeleteUser/{id}")]
         [Authorize(Roles = "OWNER,ADMIN")]
-        public IActionResult DeleteUser(int id)
+        public async Task<IActionResult> DeleteUser(int id)
         {
 
             if (id.Equals(1))
@@ -188,7 +186,7 @@ namespace DominionWarehouseAPI.Controllers
                 return BadRequest(new { Success = false, Message = "Admin account cannot be deleted" });
             }
 
-            var user = dbContext.Users.FirstOrDefault(u => u.Id == id);
+            var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
 
             if (user == null)
             {
@@ -197,7 +195,7 @@ namespace DominionWarehouseAPI.Controllers
 
             dbContext.Remove(user);
 
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync(CancellationToken.None);
 
             return Ok(new { Success = true, Message = "The user has beed successfully deleted" });
         }

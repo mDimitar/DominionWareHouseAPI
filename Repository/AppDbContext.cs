@@ -140,7 +140,7 @@ namespace DominionWarehouseAPI.Database
             SeedRolesData(modelBuilder);
             SeedAdminUserData(modelBuilder);
         }
-        public override int SaveChanges()
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
         {
             // Check for new users being added
             var addedUsers = ChangeTracker.Entries<User>()
@@ -155,12 +155,12 @@ namespace DominionWarehouseAPI.Database
                 {
                     var newShoppingCart = new ShoppingCart();
                     user.ShoppingCart = newShoppingCart;
-                    base.SaveChanges();
+                    await base.SaveChangesAsync(cancellationToken);
                     user.ShoppingCartId = newShoppingCart.Id;
                 }
             }
 
-            return base.SaveChanges();
+            return await base.SaveChangesAsync(cancellationToken);
         }
 
         //seed roles
