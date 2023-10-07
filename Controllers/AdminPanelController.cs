@@ -9,6 +9,8 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using DominionWarehouseAPI.Models;
 using DominionWarehouseAPI.Models.Enums;
+using System.Globalization;
+using System;
 
 namespace DominionWarehouseAPI.Controllers
 {
@@ -26,11 +28,18 @@ namespace DominionWarehouseAPI.Controllers
             _configuration = configuration;
         }
 
-        [HttpGet("GetAllFinishedOrders")]
-        public async Task<IActionResult> GetAllFinishedOrdersCount()
+        [HttpGet("GetAllOrdersCountByStatus")]
+        public async Task<IActionResult> GetAllOrdersCountByStatus()
         {
 
-            var orders = await dbContext.Orders.Where(order => order.OrderStatus == OrderStatus.Delivered)
+            var totalOrders = await dbContext.Orders.ToListAsync();
+
+            if(totalOrders.IsNullOrEmpty())
+            {
+                return BadRequest(new { Success = false, Message = "No orders have been found in the database" });
+            }
+
+            var DeliveredOrders = await dbContext.Orders.Where(order => order.OrderStatus == OrderStatus.Delivered)
                 .Select(order => new
                 {
                     Id = order.Id,
@@ -41,12 +50,29 @@ namespace DominionWarehouseAPI.Controllers
                     SoldFromEmployee = dbContext.Users.FirstOrDefault(u => u.Id == order.soldFromEmployeeId).Username
                 }).ToListAsync();
 
-            if(orders.IsNullOrEmpty())
-            {
-                return BadRequest( new { Success = false, Message = "No orders have been found in the database" } );
-            }
+            var ProcessingOrders = await dbContext.Orders.Where(order => order.OrderStatus == OrderStatus.Processing)
+                .Select(order => new
+                {
+                    Id = order.Id,
+                    User = order.User.Username,
+                    TotalSum = order.TotalSum,
+                    Comment = order.Comment,
+                    Date = order.DateCreated.ToString("f"),
+                    SoldFromEmployee = dbContext.Users.FirstOrDefault(u => u.Id == order.soldFromEmployeeId).Username
+                }).ToListAsync();
 
-            return Ok(new { FinishedOrdersCount = orders.Count() });
+            var CanceledOrders = await dbContext.Orders.Where(order => order.OrderStatus == OrderStatus.Canceled)
+                .Select(order => new
+                {
+                    Id = order.Id,
+                    User = order.User.Username,
+                    TotalSum = order.TotalSum,
+                    Comment = order.Comment,
+                    Date = order.DateCreated.ToString("f"),
+                    SoldFromEmployee = dbContext.Users.FirstOrDefault(u => u.Id == order.soldFromEmployeeId).Username
+                }).ToListAsync();
+
+            return Ok(new { Delivered = DeliveredOrders.Count, Processing = ProcessingOrders.Count, Canceled = CanceledOrders.Count});
         }
 
 
@@ -68,6 +94,7 @@ namespace DominionWarehouseAPI.Controllers
                     User = order.User.Username,
                     TotalSum = order.TotalSum,
                     Comment = order.Comment,
+                    DeliveryAddress = order.DeliveryAddress,
                     Date = order.DateCreated.ToString("M/d/yyyy h:mm:ss tt"),
                     SoldFromEmployee = dbContext.Users.FirstOrDefault(u => u.Id == order.soldFromEmployeeId).Username
                 }).ToListAsync();
@@ -98,7 +125,7 @@ namespace DominionWarehouseAPI.Controllers
                     User = order.User.Username,
                     TotalSum = order.TotalSum,
                     Comment = order.Comment,
-                    Date = order.DateCreated.ToString("M/d/yyyy h:mm:ss tt"),
+                    Date = order.DateCreated.ToString("f"),
                     SoldFromEmployee = dbContext.Users.FirstOrDefault(u => u.Id == order.soldFromEmployeeId).Username
                 }).ToListAsync();
 
@@ -127,5 +154,24 @@ namespace DominionWarehouseAPI.Controllers
 
             return Ok(returnedObject);
         }
+
+            [HttpGet("GetMonthlyOrderCount")]
+            public async Task<IActionResult> GetMonthlyOrderCount()
+            {
+                var monthlyOrderCounts = Enumerable.Range(1, 12)
+                    .Select(month => new
+                    {
+                        Month = DateTimeFormatInfo.CurrentInfo.GetMonthName(month),
+                        OrderCount = dbContext.Orders
+                            .Where(o => o.DateCreated.Year == DateTime.Now.Year && o.DateCreated.Month == month)
+                            .Where(o => o.OrderStatus == OrderStatus.Delivered)
+                            .Count()
+                    })
+                    .ToList();
+
+            var result = await Task.FromResult(monthlyOrderCounts);
+
+            return Ok(result);
+            }
     }
 }
