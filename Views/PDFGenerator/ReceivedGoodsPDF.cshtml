@@ -1,0 +1,90 @@
+﻿<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div class="container flex justify-center text-2xl font-bold">
+        <h1>Dominion Warehouse Received Goods Report</h1>
+    </div>
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+            <thead class="text-xs text-gray-700 uppercase text-center bg-gray-100 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                    <th scope="col" class="px-6 py-3">
+                        ID
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        User
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Product Name
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Product Description
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Product Quantity
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Acceptance Date
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @if(ViewBag.Count != 0)
+                {
+                    @foreach (var item in ViewBag.receivedGoods)
+                    {
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 text-center">
+                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                @item.Id
+                            </th>
+                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                @item.User.Username
+                            </th>
+                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                @item.Product.ProductName
+                            </th>
+                            <td class="px-6 py-4">
+                                @item.Product.ProductDescription
+                            </td>
+                            <td class="px-6 py-4">
+                                @item.ProductQuantity pieces
+                            </td>
+                            <td class="px-6 py-4">
+                                @item.AcceptanceDate
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 text-center">
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            No Data
+                        </th>
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            No Data
+                        </th>
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            No Data
+                        </th>
+                        <td class="px-6 py-4">
+                            No Data
+                        </td>
+                        <td class="px-6 py-4">
+                            No Data
+                        </td>
+                        <td class="px-6 py-4">
+                            No Data
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

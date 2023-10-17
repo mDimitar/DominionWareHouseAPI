@@ -32,6 +32,8 @@ builder.Services.AddSwaggerGen(options =>
 
 });
 
+builder.Services.AddControllersWithViews();
+
 builder.Services.AddAuthentication().AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -70,6 +72,8 @@ if (app.Environment.IsDevelopment())
 app.UseAuthorization();
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
 
 app.MapControllers();
 

@@ -6,8 +6,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.ComponentModel.DataAnnotations;
+using PdfSharpCore;
+using PdfSharpCore.Pdf;
+using PuppeteerSharp;
 using System.Security.Claims;
+using System.Text.Json;
+using TheArtOfDev.HtmlRenderer.PdfSharp;
 
 namespace DominionWarehouseAPI.Controllers
 {
@@ -18,11 +22,13 @@ namespace DominionWarehouseAPI.Controllers
     {
         private readonly AppDbContext dbContext;
         private readonly IConfiguration _configuration;
+        private readonly IHostEnvironment _hostEnvironment;
 
-        public OrdersController(AppDbContext context, IConfiguration configuration)
+        public OrdersController(AppDbContext context, IConfiguration configuration, IHostEnvironment hostEnvironment)
         {
             this.dbContext = context;
             _configuration = configuration;
+            _hostEnvironment = hostEnvironment;
         }
 
         [HttpGet("GetAllOrdersForBuyer")]
@@ -51,11 +57,11 @@ namespace DominionWarehouseAPI.Controllers
                     CommentFromEmployee = order.CommentFromEmployee,
                 })
                 .Where(o => o.UserId == user.Id).ToListAsync();
-           
+
 
             if (orders.IsNullOrEmpty())
             {
-                return BadRequest(new {Success = false , Message = "No orders found in the database." });
+                return BadRequest(new { Success = false, Message = "No orders found in the database." });
             }
 
             return Ok(orders);
@@ -137,7 +143,7 @@ namespace DominionWarehouseAPI.Controllers
 
             dbContext.Orders.Add(neworder);
 
-           await dbContext.SaveChangesAsync(CancellationToken.None);
+            await dbContext.SaveChangesAsync(CancellationToken.None);
 
             foreach (var product in prodsInShoppingCart)
             {
@@ -148,7 +154,7 @@ namespace DominionWarehouseAPI.Controllers
                     Quantity = product.Quantity,
                 };
                 dbContext.ProductsInOrder.Add(prodInOrder);
-               await dbContext.SaveChangesAsync(CancellationToken.None);
+                await dbContext.SaveChangesAsync(CancellationToken.None);
             }
 
             await dbContext.SaveChangesAsync(CancellationToken.None);
@@ -168,14 +174,14 @@ namespace DominionWarehouseAPI.Controllers
         {
             var order = await dbContext.Orders.FirstOrDefaultAsync(o => o.Id == id);
 
-            if(order == null)
+            if (order == null)
             {
-                return BadRequest(new {Success = false ,Message = "The requested order cannot be found"});
+                return BadRequest(new { Success = false, Message = "The requested order cannot be found" });
             }
 
             if (order.OrderStatus.Equals("Canceled"))
             {
-                return BadRequest(new {Success = false, Message = "The order have been closed and cannot accept editing." });
+                return BadRequest(new { Success = false, Message = "The order have been closed and cannot accept editing." });
             }
 
             order.PhoneNumber = request.PhoneNumber.IsNullOrEmpty() ? order.PhoneNumber : request.PhoneNumber;
@@ -218,7 +224,7 @@ namespace DominionWarehouseAPI.Controllers
             order.soldFromEmployeeId = user.Id;
             await dbContext.SaveChangesAsync(CancellationToken.None);
 
-            return Ok(new {Success = true, Message = "The order has been finalized."});
+            return Ok(new { Success = true, Message = "The order has been finalized." });
         }
 
         [HttpPut("CancelOrder/{id}")]
@@ -232,15 +238,17 @@ namespace DominionWarehouseAPI.Controllers
 
             var order = await dbContext.Orders.FirstOrDefaultAsync(o => o.Id == id);
 
-            if(order == null)
+            if (order == null)
             {
                 return BadRequest(new { Success = false, Message = "Order not found" });
             }
 
-            if (user.Role.RoleName.Equals("EMPLOYEE"))
+            if (user.Role.RoleName.Equals("EMPLOYEE") || user.Role.RoleName.Equals("OWNER"))
             {
                 order.OrderStatus = OrderStatus.Canceled;
                 order.CommentFromEmployee = "The order has been canceled by an employee. Please contact us for more info.";
+                await dbContext.SaveChangesAsync(CancellationToken.None);
+                return Ok(new { Success = true, Message = "The order has been canceled." });
             }
 
             order.OrderStatus = OrderStatus.Canceled;
@@ -249,6 +257,29 @@ namespace DominionWarehouseAPI.Controllers
             await dbContext.SaveChangesAsync(CancellationToken.None);
 
             return Ok(new { Success = true, Message = "The order has been canceled." });
+        }
+
+        [HttpGet("GeneratePDFConfirmationDocument")]
+        [Authorize(Roles = "EMPLOYEE,OWNER")]
+        public async Task<IActionResult> GeneratePDFConfirmationDocument(int orderId)
+        {
+            var options = new LaunchOptions
+            {
+                Headless = true,
+            };
+            var browserFetcher = new BrowserFetcher();
+            await browserFetcher.DownloadAsync();
+
+            using var browser = await Puppeteer.LaunchAsync(options);
+            using var page = await browser.NewPageAsync();
+            using var ms = new MemoryStream();
+
+            var url = Url.ActionLink("OrderPDF", "PDFGenerator", new { model = JsonSerializer.Serialize(orderId) });
+            await page.GoToAsync(url);
+
+            var pdfStream = await page.PdfDataAsync();
+
+            return File(pdfStream,"application/pdf","Order_#"+orderId);
         }
     }
 }

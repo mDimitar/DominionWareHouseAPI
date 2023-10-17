@@ -1,0 +1,75 @@
+﻿<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div class="container flex justify-center text-2xl font-bold">
+        <h1>Dominion Warehouse Order Export</h1>
+    </div>
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+            <thead class="text-xs text-gray-700 uppercase text-center bg-gray-100 dark:bg-gray-700 dark:text-gray-400">
+                <tr class="bg-gray-400">
+                    <th scope="col" class="px-6 py-3">
+                        Order ID: @ViewBag.order.Id
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Date Created: @ViewBag.order.DateCreated
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Phone Number: @ViewBag.order.PhoneNumber
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Delivery Address: @ViewBag.order.DeliveryAddress
+                    </th>
+                </tr>
+                <tr>
+                    <th scope="col" class="px-6 py-3">
+                        Product name
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Product Description
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Product Quantity
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Category
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Price
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in ViewBag.order.OrderProducts)
+                {
+                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 text-center">
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            @item.Product.ProductName
+                        </th>
+                        <td class="px-6 py-4">
+                            @item.Product.ProductDescription
+                        </td>
+                        <td class="px-6 py-4">
+                            @item.Quantity
+                        </td>
+                        <td class="px-6 py-4">
+                            @item.Product.Category.CategoryName
+                        </td>
+                        <td class="px-6 py-4">
+                            @item.Product.ProductPriceForSelling мкд
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="text-xl flex justify-center font-bold">
+            <h1>Total: @ViewBag.order.TotalSum мкд</h1>
+        </div>
+    </div>
+</body>
+</html>
