@@ -173,9 +173,6 @@ namespace DominionWarehouseAPI.Controllers
             return Ok(new { Success = true, Message = "The user data has been successfully updated." });
         }
 
-
-
-
         [HttpDelete("DeleteUser/{id}")]
         [Authorize(Roles = "OWNER,ADMIN")]
         public async Task<IActionResult> DeleteUser(int id)

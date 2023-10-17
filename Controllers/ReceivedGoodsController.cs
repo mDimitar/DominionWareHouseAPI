@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using PuppeteerSharp;
 using System.Security.Claims;
 using System.Text.Json;
@@ -12,7 +13,6 @@ namespace DominionWarehouseAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "OWNER,ADMIN")]
     public class ReceivedGoodsController : ControllerBase
     {
 
@@ -26,6 +26,7 @@ namespace DominionWarehouseAPI.Controllers
         }
 
         [HttpGet("ViewReceivedGoods")]
+        [Authorize(Roles = "EMPLOYEE,OWNER,ADMIN")]
         public async Task<IActionResult> ViewReceivedGoods()
         {
             var log = await dbContext.ReceivedGoodsBy.Include(p => p.Product).Include(u => u.User)
@@ -47,6 +48,19 @@ namespace DominionWarehouseAPI.Controllers
         {
             string username = User.FindFirstValue(ClaimTypes.Name);
             var user = await dbContext.Users.Include(sc => sc.ShoppingCart).FirstOrDefaultAsync(u => u.Username == username);
+
+            var receivedGoods = await dbContext.ReceivedGoodsBy
+                .Include(r => r.User)
+                .Include(r => r.Product)
+                .Where(r => r.UserId == user.Id)
+                .Where(r => r.AcceptanceDate.Date == DateTime.Now.Date)
+                .ToListAsync();
+
+            if (receivedGoods.IsNullOrEmpty())
+            {
+                return BadRequest(new { Success = false, Message = "No logs were found right now." });
+            }
+
             var options = new LaunchOptions
             {
                 Headless = true,
